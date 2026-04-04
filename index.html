@@ -118,11 +118,11 @@
         // ==========================================
         // 1. SECURITY: DOMAIN LOCK & HOTKEYS
         // ==========================================
-        const EXPECTED_DOMAIN = "localhost"; // TODO: 部署時改為實際網域 e.g., "www.ibs.ncnu.edu.tw"
-        if (window.location.hostname !== EXPECTED_DOMAIN && window.location.hostname !== "127.0.0.1" && window.location.hostname !== "") {
-            // 啟用時請解除註解
-            // document.getElementById('domain-lock-overlay').style.display = 'flex';
-            // setTimeout(() => window.location.href = "https://www.ibs.ncnu.edu.tw", 3000);
+        const EXPECTED_DOMAIN = "lolopodcast.github.io"; 
+        if (window.location.hostname !== EXPECTED_DOMAIN && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" && window.location.hostname !== "") {
+            // 啟用網域白名單攔截
+            document.getElementById('domain-lock-overlay').style.display = 'flex';
+            setTimeout(() => window.location.href = "https://" + EXPECTED_DOMAIN, 3000);
         }
 
         // ==========================================
@@ -445,10 +445,12 @@
             // Interaction Handler
             const trackInteraction = () => setAnalytics(prev => ({ ...prev, interactions: prev.interactions + 1 }));
 
-            // TTS Engine
+            // TTS Engine (With Browser Safety Checks)
             const [isSpeaking, setIsSpeaking] = useState(false);
-            const synth = window.speechSynthesis;
+            const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
+            
             const speak = useCallback((text) => {
+                if (!synth) return;
                 synth.cancel();
                 if (!text) return;
                 const msg = new SpeechSynthesisUtterance(text);
@@ -470,6 +472,7 @@
             }, [lang, synth]);
 
             const togglePlayPause = () => {
+                if (!synth) return;
                 if (synth.speaking) {
                     if (synth.paused) { synth.resume(); setIsSpeaking(true); } 
                     else { synth.pause(); setIsSpeaking(false); }
@@ -478,7 +481,13 @@
                     if (contentDiv) speak(contentDiv.innerText);
                 }
             };
-            const stopVoice = () => { synth.cancel(); setIsSpeaking(false); };
+            
+            const stopVoice = () => { 
+                if (synth) { 
+                    synth.cancel(); 
+                    setIsSpeaking(false); 
+                } 
+            };
 
             const scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); trackInteraction(); };
 
@@ -511,7 +520,7 @@
                             {/* Voice Controls */}
                             <div className="flex items-center space-x-3 border-r border-[var(--bcg-border)] pr-4 lg:pr-6">
                                 <button onClick={togglePlayPause} className={`transition flex items-center gap-1.5 uppercase text-[10px] font-bold tracking-widest ${isSpeaking ? 'text-[var(--bcg-accent)]' : 'hover:opacity-70'}`}>
-                                    <i data-lucide={isSpeaking && !synth.paused ? "pause" : "play"} className="w-4 h-4"></i>
+                                    <i data-lucide={isSpeaking && (!synth || !synth.paused) ? "pause" : "play"} className="w-4 h-4"></i>
                                     <span className="hidden md:block">Audio</span>
                                 </button>
                                 <button onClick={stopVoice} className="hover:text-[var(--bcg-red)] transition">
@@ -564,10 +573,23 @@
                     {/* ===== MAIN CONTENT ===== */}
                     <main id="readable-content" className="pt-32 pb-24 px-6 lg:px-12 max-w-4xl mx-auto w-full flex-grow">
                         {currentPage === 0 && <PageSummary t={t} navigateTo={navigateTo} />}
-                        {currentPage >= 1 && currentPage <= 6 && <PageTheme theme={t.themes[currentPage - 1]} t={t} setAnalytics={setAnalytics} onPrev={() => navigateTo(currentPage - 1)} onNext={() => navigateTo(currentPage + 1)} />}
+                        
+                        {/* Theme rendering is now completely safe from ReferenceErrors and guarantees state reset via Key injection */}
+                        {currentPage >= 1 && currentPage <= 6 && (
+                            <PageTheme 
+                                key={`theme-${currentPage}`} 
+                                theme={t.themes[currentPage - 1]} 
+                                t={t} 
+                                lang={lang} 
+                                setAnalytics={setAnalytics} 
+                                onPrev={() => navigateTo(currentPage - 1)} 
+                                onNext={() => navigateTo(currentPage + 1)} 
+                            />
+                        )}
+                        
                         {currentPage === 7 && <PageLab t={t} />}
                         {currentPage === 8 && <PageResources t={t} />}
-                        {currentPage === 9 && <PageAnalytics t={t} analytics={analytics} userInfo={userInfo} setUserInfo={setUserInfo} brand={t.brand} shouldClearData={shouldClearData} setShouldClearData={setShouldClearData} setAnalyticsState={setAnalytics} />}
+                        {currentPage === 9 && <PageAnalytics t={t} lang={lang} analytics={analytics} userInfo={userInfo} setUserInfo={setUserInfo} brand={t.brand} shouldClearData={shouldClearData} setShouldClearData={setShouldClearData} setAnalyticsState={setAnalytics} />}
                     </main>
 
                     {/* ===== FOOTER (h-8 = 1/2 of h-16) - Strictly 32px ===== */}
@@ -614,15 +636,18 @@
             </div>
         );
 
-        const PageTheme = ({ theme, t, setAnalytics, onPrev, onNext }) => {
+        const PageTheme = ({ theme, t, lang, setAnalytics, onPrev, onNext }) => {
             const [cardPage, setCardPage] = useState(0);
             const [flippedCards, setFlippedCards] = useState({});
             const [quizPage, setQuizPage] = useState(0);
             const [quizAnswers, setQuizAnswers] = useState({});
             const [quizFeedback, setQuizFeedback] = useState({});
 
-            const visibleCards = theme.cards.slice(cardPage * 2, cardPage * 2 + 2);
-            const visibleQuizzes = theme.quiz.slice(quizPage * 2, quizPage * 2 + 2);
+            const safeCards = theme.cards || [];
+            const visibleCards = safeCards.slice(cardPage * 2, cardPage * 2 + 2);
+            
+            const safeQuizzes = theme.quiz || [];
+            const visibleQuizzes = safeQuizzes.slice(quizPage * 2, quizPage * 2 + 2);
 
             const handleFlip = (globalIndex) => {
                 setFlippedCards(prev => ({ ...prev, [globalIndex]: !prev[globalIndex] }));
@@ -632,9 +657,9 @@
             const handleQuizAnswer = (qIndex, oIndex) => {
                 const globalIndex = quizPage * 2 + qIndex;
                 if (quizAnswers[globalIndex] !== undefined) return; 
-                const isCorrect = theme.quiz[globalIndex].ans === oIndex;
+                const isCorrect = safeQuizzes[globalIndex].ans === oIndex;
                 setQuizAnswers(prev => ({ ...prev, [globalIndex]: oIndex }));
-                setQuizFeedback(prev => ({ ...prev, [globalIndex]: { correct: isCorrect, msg: theme.quiz[globalIndex].feedback } }));
+                setQuizFeedback(prev => ({ ...prev, [globalIndex]: { correct: isCorrect, msg: safeQuizzes[globalIndex].feedback } }));
                 setAnalytics(prev => ({
                     ...prev, interactions: prev.interactions + 1, quizTotal: prev.quizTotal + 1, quizScore: prev.quizScore + (isCorrect ? 1 : 0)
                 }));
@@ -656,7 +681,7 @@
 
                     {/* Highlights Tags - Flat, Sharp */}
                     <div className="flex flex-wrap gap-2 mb-10">
-                        {theme.highlights.map((h, i) => (
+                        {(theme.highlights || []).map((h, i) => (
                             <span key={i} className="px-3 py-1 bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase rounded-sm">{h}</span>
                         ))}
                     </div>
@@ -668,8 +693,12 @@
                         </div>
                         <div className="border border-[var(--bcg-border)] bg-black/5 dark:bg-white/5 p-8 flex flex-col items-center justify-center text-center min-h-[200px]">
                             <i data-lucide="image" className="w-8 h-8 opacity-20 mb-3"></i>
-                            <span className="text-[10px] font-bold tracking-widest uppercase opacity-50 mb-1">[ {lang === 'EN' ? 'Exhibit' : '圖表'} / {theme.kicker.split('.')[0]} ]</span>
-                            <span className="text-sm font-serif-title italic opacity-70"> ? theme.title.split('.')[1].trim() : theme.title}]</span>
+                            <span className="text-[10px] font-bold tracking-widest uppercase opacity-50 mb-1">
+                                [ {lang === 'EN' ? 'Exhibit' : '圖表'} / {theme.kicker ? theme.kicker.split('.')[0] : ''} ]
+                            </span>
+                            <span className="text-sm font-serif-title italic opacity-70">
+                                [ {lang === 'EN' ? 'Image of' : '圖片預留：'} {theme.title} ]
+                            </span>
                         </div>
                     </section>
 
@@ -677,7 +706,7 @@
                     <section className="mb-16">
                         <div className="flex items-center justify-between mb-6 border-b-2 border-black dark:border-white pb-2">
                             <h3 className="text-sm font-bold tracking-widest uppercase">Key Concepts</h3>
-                            <span className="text-[10px] font-bold tracking-widest opacity-50">{cardPage * 2 + 1}-{Math.min((cardPage + 1) * 2, theme.cards.length)} / {theme.cards.length}</span>
+                            <span className="text-[10px] font-bold tracking-widest opacity-50">{cardPage * 2 + 1}-{Math.min((cardPage + 1) * 2, safeCards.length)} / {safeCards.length}</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {visibleCards.map((card, idx) => {
@@ -704,7 +733,7 @@
                         </div>
                         <div className="flex justify-end mt-6 space-x-3">
                             <button onClick={() => { setFlippedCards({}); setCardPage(0); }} className="px-5 py-2 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 dark:hover:bg-white/5 transition">{t.btn.retry}</button>
-                            <button onClick={() => { setFlippedCards({}); setCardPage((cardPage + 1) % Math.ceil(theme.cards.length / 2)); }} className="px-5 py-2 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-opacity-90 transition">{t.btn.next}</button>
+                            <button onClick={() => { setFlippedCards({}); setCardPage((cardPage + 1) % Math.ceil(safeCards.length / 2)); }} className="px-5 py-2 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-opacity-90 transition">{t.btn.next}</button>
                         </div>
                     </section>
 
@@ -719,7 +748,7 @@
                     <section className="mb-16 border border-[var(--bcg-border)] p-8 md:p-10 bg-black/5 dark:bg-white/5">
                         <div className="flex items-center justify-between mb-8 border-b border-[var(--bcg-border)] pb-4">
                             <h3 className="text-sm font-bold tracking-widest uppercase">{t.btn.check}</h3>
-                            <span className="text-[10px] font-bold tracking-widest opacity-50">{quizPage * 2 + 1}-{Math.min((quizPage + 1) * 2, theme.quiz.length)} / {theme.quiz.length}</span>
+                            <span className="text-[10px] font-bold tracking-widest opacity-50">{quizPage * 2 + 1}-{Math.min((quizPage + 1) * 2, safeQuizzes.length)} / {safeQuizzes.length}</span>
                         </div>
 
                         <div className="space-y-12">
@@ -762,18 +791,18 @@
                         </div>
                         <div className="flex justify-end mt-10 space-x-3">
                             <button onClick={resetQuiz} className="px-5 py-2 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 dark:hover:bg-white/5 transition">{t.btn.retry}</button>
-                            <button onClick={() => setQuizPage((quizPage + 1) % Math.ceil(theme.quiz.length / 2))} className="px-5 py-2 bg-black dark:bg-white text-white dark:text-black text-[10px] font-bold tracking-widest uppercase hover:opacity-80 transition">{t.btn.next}</button>
+                            <button onClick={() => setQuizPage((quizPage + 1) % Math.ceil(safeQuizzes.length / 2))} className="px-5 py-2 bg-black dark:bg-white text-white dark:text-black text-[10px] font-bold tracking-widest uppercase hover:opacity-80 transition">{t.btn.next}</button>
                         </div>
                     </section>
 
                     {/* Pagination */}
                     <div className="flex items-center justify-between pt-6 border-t border-[var(--bcg-border)]">
-                        {theme.kicker.startsWith("1.") ? <div></div> : (
+                        {theme.kicker && theme.kicker.startsWith("1.") ? <div></div> : (
                             <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-accent)] transition">
                                 <i data-lucide="arrow-left" className="w-4 h-4"></i><span>{t.btn.prevPage}</span>
                             </button>
                         )}
-                        {theme.kicker.startsWith("6.") ? <div></div> : (
+                        {theme.kicker && theme.kicker.startsWith("6.") ? <div></div> : (
                             <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-accent)] transition">
                                 <span>{t.btn.nextPage}</span><i data-lucide="arrow-right" className="w-4 h-4"></i>
                             </button>
@@ -817,10 +846,10 @@
             </div>
         );
 
-        const PageAnalytics = ({ t, analytics, userInfo, setUserInfo, brand, shouldClearData, setShouldClearData, setAnalyticsState }) => {
+        const PageAnalytics = ({ t, lang, analytics, userInfo, setUserInfo, brand, shouldClearData, setShouldClearData, setAnalyticsState }) => {
             const exportCSV = () => {
                 if (!userInfo.id || !userInfo.name) {
-                    alert(t.nav[9] === "Analytics Dashboard" ? "Please fill in Group, ID, and Name." : "請填寫組別、學號與姓名。");
+                    alert(lang === 'EN' ? "Please fill in Group, ID, and Name." : "請填寫組別、學號與姓名。");
                     return;
                 }
 
