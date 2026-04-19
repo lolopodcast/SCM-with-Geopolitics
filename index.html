@@ -251,7 +251,13 @@
                 ],
                 lab: { title: "Strategy Lab", kicker: "7. INTERACTIVE MODULES", desc: "Apply strategic frameworks to real-world operational scenarios." },
                 resources: { title: "External Resources", kicker: "8. LITERATURE & INSIGHTS", items: ["Financial Times: Macro-geopolitical energy impact", "Reuters: ASEAN strategic trade dimensions", "Bloomberg: Supply Chain Foundation Reports", "Focus Taiwan: Tariff frameworks on SMEs"] },
-                analytics: { title: "Analytics Dashboard", kicker: "9. PERFORMANCE METRICS", group: "Group / Cohort", studentId: "Student ID No.", name: "Full Name", export: "Export CSV Report", interactions: "Interactions", time: "Session (Sec)", clear: "Clear data post-export", cards: "Cards Reviewed", quiz: "Quiz Accuracy" },
+                analytics: { 
+                    title: "Analytics Dashboard", kicker: "9. PERFORMANCE METRICS", 
+                    group: "Group / Cohort", studentId: "Student ID No.", name: "Full Name", 
+                    export: "Export CSV Report", interactions: "Interactions", time: "Session (Sec)", 
+                    clear: "Clear data post-export", cards: "Cards Explored", quiz: "Quiz Accuracy",
+                    modDetails: "Module Analytics Breakdown", modTime: "Time (s)", modCards: "Cards (Flip/Show/Tot)", modQuiz: "Quiz (Corr/Ans/Tot)"
+                },
                 footer: { top: "Top", architect: "Architect: Prof. Shihmin Lo", copy: "2026 Global SCM Strategy. All rights reserved." },
                 btn: { next: "Next Theme", retry: "Reset", prevPage: "Previous Theme", check: "Module Knowledge Check", read: "Read", answered: "Answered", nextCards: "Next Cards", nextQuiz: "Next Quizzes", flashcards: "Deep Dive Cards" }
             },
@@ -388,7 +394,13 @@
                 ],
                 lab: { title: "策略實驗室", kicker: "7. INTERACTIVE MODULES", desc: "將策略架構應用於真實世界的營運情境中進行互動演練。" },
                 resources: { title: "外部學習資源", kicker: "8. LITERATURE & INSIGHTS", items: ["Financial Times: 總體地緣政治對能源的衝擊", "Reuters: 東協策略性貿易構面", "Bloomberg: 供應鏈基礎韌性報告", "Focus Taiwan: 關稅架構對中小企業的影響"] },
-                analytics: { title: "學習歷程分析", kicker: "9. PERFORMANCE METRICS", group: "所屬組別", studentId: "學號 (ID)", name: "真實姓名", export: "匯出歷程紀錄 (CSV)", interactions: "互動點擊次數", time: "系統停留時間 (秒)", clear: "匯出後清除本地紀錄", cards: "學習卡翻閱率", quiz: "測驗答對率" },
+                analytics: { 
+                    title: "學習歷程分析", kicker: "9. PERFORMANCE METRICS", 
+                    group: "所屬組別", studentId: "學號 (ID)", name: "真實姓名", 
+                    export: "匯出歷程紀錄 (CSV)", interactions: "互動點擊次數", time: "系統停留時間 (秒)", 
+                    clear: "匯出後清除本地紀錄", cards: "學習卡探索率", quiz: "測驗答對率",
+                    modDetails: "各模組分頁數據分析", modTime: "停留 (秒)", modCards: "卡片 (已翻/顯示/總數)", modQuiz: "測驗 (答對/已答/總數)"
+                },
                 footer: { top: "回到頂部", architect: "Architect: Prof. Shihmin Lo", copy: "2026 Global SCM Strategy. 版權所有." },
                 btn: { next: "前往下一單元", retry: "重新測試", prevPage: "返回上一單元", check: "模組知識檢定", read: "已讀", answered: "已答", nextCards: "下一組卡片", nextQuiz: "下一組題目", flashcards: "翻轉學習卡" }
             }
@@ -789,14 +801,16 @@
             const [currentPage, setCurrentPage] = useState(0); 
             const [isMenuOpen, setIsMenuOpen] = useState(false);
             
+            // Analytics Core State Update
             const [analytics, setAnalytics] = useState({
                 startTime: Date.now(),
                 pageTimes: {},
                 interactions: 0,
-                cardsSeen: new Set(),
-                quizzesAnswered: new Set(),
-                quizScore: 0
+                cardsShown: new Set(),
+                cardsFlipped: new Set(),
+                quizAnswers: {} // Object tracking unique ID `${themeIdx}-${qIndex}` -> boolean
             });
+
             const [userInfo, setUserInfo] = useState({ group: 'G1', id: '', name: '' });
             const [shouldClearData, setShouldClearData] = useState(false);
 
@@ -1025,11 +1039,34 @@
             const safeQuizzes = theme.quiz || [];
             const visibleQuizzes = safeQuizzes.slice(quizPage * 2, quizPage * 2 + 2);
 
+            const totalCardsInTheme = safeCards.length;
+            const totalQuizInTheme = safeQuizzes.length;
+
+            // Track "Shown" cards whenever cardPage changes
+            useEffect(() => {
+                setAnalytics(prev => {
+                    const newShown = new Set(prev.cardsShown);
+                    let changed = false;
+                    // Safely iterate 0 and 1 for the 2 slots max per page
+                    [0, 1].forEach((offset) => {
+                        const globalIndex = cardPage * 2 + offset;
+                        if (globalIndex < totalCardsInTheme) {
+                            const id = `${themeIdx}-${globalIndex}`;
+                            if (!newShown.has(id)) {
+                                newShown.add(id);
+                                changed = true;
+                            }
+                        }
+                    });
+                    return changed ? { ...prev, cardsShown: newShown } : prev;
+                });
+            }, [cardPage, themeIdx, totalCardsInTheme, setAnalytics]);
+
             const handleFlip = (globalIndex) => {
                 setFlippedCards(prev => ({ ...prev, [globalIndex]: !prev[globalIndex] }));
                 setAnalytics(prev => {
-                    const newSeen = new Set(prev.cardsSeen).add(`${themeIdx}-${globalIndex}`);
-                    return { ...prev, interactions: prev.interactions + 1, cardsSeen: newSeen };
+                    const newSeen = new Set(prev.cardsFlipped).add(`${themeIdx}-${globalIndex}`);
+                    return { ...prev, interactions: prev.interactions + 1, cardsFlipped: newSeen };
                 });
             };
 
@@ -1042,9 +1079,11 @@
                 setLocalQuizState(prev => ({ ...prev, [globalIndex]: oIndex }));
                 
                 setAnalytics(prev => {
-                    const newAns = new Set(prev.quizzesAnswered).add(uniqueQId);
-                    const scoreInc = (!prev.quizzesAnswered.has(uniqueQId) && isCorrect) ? 1 : 0;
-                    return { ...prev, interactions: prev.interactions + 1, quizzesAnswered: newAns, quizScore: prev.quizScore + scoreInc };
+                    return { 
+                        ...prev, 
+                        interactions: prev.interactions + 1, 
+                        quizAnswers: { ...prev.quizAnswers, [uniqueQId]: isCorrect } 
+                    };
                 });
             };
 
@@ -1066,11 +1105,13 @@
                 }
             };
 
-            const totalCardsInTheme = safeCards.length;
-            const seenCardsInTheme = safeCards.filter((_, i) => analytics.cardsSeen.has(`${themeIdx}-${i}`)).length;
+            // Derive current theme metrics from Global Analytics State
+            const flippedInTheme = Array.from(analytics.cardsFlipped).filter(id => id.startsWith(`${themeIdx}-`)).length;
+            const shownInTheme = Array.from(analytics.cardsShown).filter(id => id.startsWith(`${themeIdx}-`)).length;
             
-            const totalQuizInTheme = safeQuizzes.length;
-            const answeredQuizInTheme = safeQuizzes.filter((_, i) => analytics.quizzesAnswered.has(`${themeIdx}-${i}`)).length;
+            const themeQuizAnswers = Object.entries(analytics.quizAnswers).filter(([id]) => id.startsWith(`${themeIdx}-`));
+            const answeredQuizInTheme = themeQuizAnswers.length;
+            const correctQuizInTheme = themeQuizAnswers.filter(([_, isC]) => isC).length;
 
             return (
                 <div className="animate-fade pb-8">
@@ -1102,7 +1143,8 @@
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 border-b-2 border-[var(--bcg-primary)] dark:border-white pb-2 gap-2">
                             <h3 className="text-sm font-bold tracking-widest uppercase">{t.btn.flashcards}</h3>
                             <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest opacity-60" aria-hidden="true">
-                                <span>{t.btn.read}: {seenCardsInTheme}/{totalCardsInTheme}</span>
+                                {/* Format: 已翻/顯示/總數 */}
+                                <span>Flip/Show/Tot: {flippedInTheme}/{shownInTheme}/{totalCardsInTheme}</span>
                                 <span className="hidden sm:inline">|</span>
                                 <span>View: {cardPage * 2 + 1}-{Math.min((cardPage + 1) * 2, totalCardsInTheme)} / {totalCardsInTheme}</span>
                             </div>
@@ -1146,7 +1188,8 @@
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 border-b border-[var(--bcg-border)] pb-4 gap-2">
                             <h3 className="text-sm font-bold tracking-widest uppercase text-[var(--bcg-gold)]">{t.btn.check}</h3>
                             <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest opacity-60" aria-hidden="true">
-                                <span>{t.btn.answered}: {answeredQuizInTheme}/{totalQuizInTheme}</span>
+                                {/* Format: 答對/已答/總數 */}
+                                <span>Corr/Ans/Tot: {correctQuizInTheme}/{answeredQuizInTheme}/{totalQuizInTheme}</span>
                                 <span className="hidden sm:inline">|</span>
                                 <span>View: {quizPage * 2 + 1}-{Math.min((quizPage + 1) * 2, totalQuizInTheme)} / {totalQuizInTheme}</span>
                             </div>
@@ -1272,10 +1315,10 @@
 
         const PageAnalytics = ({ t, lang, analytics, userInfo, setUserInfo, brand, shouldClearData, setShouldClearData, setAnalyticsState, themes, onPrev }) => {
             const totalCardsExpected = themes.reduce((acc, theme) => acc + (theme.cards ? theme.cards.length : 0), 0);
-            const totalQuizExpected = themes.reduce((acc, theme) => acc + (theme.quiz ? theme.quiz.length : 0), 0);
             
-            const cardRate = totalCardsExpected > 0 ? Math.round((analytics.cardsSeen.size / totalCardsExpected) * 100) : 0;
-            const quizAcc = analytics.quizzesAnswered.size > 0 ? Math.round((analytics.quizScore / analytics.quizzesAnswered.size) * 100) : 0;
+            const allAnsweredKeys = Object.keys(analytics.quizAnswers).length;
+            const allCorrectVals = Object.values(analytics.quizAnswers).filter(v => v).length;
+            const quizAcc = allAnsweredKeys > 0 ? Math.round((allCorrectVals / allAnsweredKeys) * 100) : 0;
             const sessionTime = Math.floor((Date.now() - analytics.startTime) / 1000);
 
             const exportCSV = () => {
@@ -1298,15 +1341,31 @@
                     ["Macro Metric", "Value"],
                     ["Total Interactions", analytics.interactions],
                     ["Session Time (sec)", sessionTime],
-                    ["Flashcards Explored", `${analytics.cardsSeen.size} / ${totalCardsExpected}`],
-                    ["Quiz Accuracy", `${analytics.quizScore} / ${analytics.quizzesAnswered.size} (${quizAcc}%)`],
+                    ["Flashcards Explored", `${analytics.cardsFlipped.size} / ${totalCardsExpected}`],
+                    ["Quiz Accuracy", `${allCorrectVals} / ${allAnsweredKeys} (${quizAcc}%)`],
                     ["", ""],
-                    ["Strategic Module", "Time Allocated (sec)"]
+                    ["Module Breakdown", "Time (s)", "Cards (Flipped/Shown/Total)", "Quiz (Correct/Ans/Total)"]
                 ];
 
-                Object.entries(analytics.pageTimes).forEach(([pid, time]) => {
-                    const pageName = t.nav[pid] || `Page ${pid}`;
-                    rows.push([pageName, time]);
+                themes.forEach((theme, i) => {
+                    const themeIdx = i + 1;
+                    const totalCards = theme.cards ? theme.cards.length : 0;
+                    const totalQuizzes = theme.quiz ? theme.quiz.length : 0;
+                    
+                    const shownCards = Array.from(analytics.cardsShown).filter(id => id.startsWith(`${themeIdx}-`)).length;
+                    const flippedCards = Array.from(analytics.cardsFlipped).filter(id => id.startsWith(`${themeIdx}-`)).length;
+                    
+                    const moduleQuizAnswers = Object.entries(analytics.quizAnswers).filter(([id]) => id.startsWith(`${themeIdx}-`));
+                    const answeredQuizzes = moduleQuizAnswers.length;
+                    const correctQuizzes = moduleQuizAnswers.filter(([_, isC]) => isC).length;
+                    const timeSec = analytics.pageTimes[themeIdx] || 0;
+
+                    rows.push([
+                        `M${themeIdx}: ${theme.title}`,
+                        timeSec,
+                        `${flippedCards}/${shownCards}/${totalCards}`,
+                        `${correctQuizzes}/${answeredQuizzes}/${totalQuizzes}`
+                    ]);
                 });
 
                 let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + rows.map(e => e.join(",")).join("\n");
@@ -1320,7 +1379,7 @@
                 document.body.removeChild(link);
 
                 if (shouldClearData) {
-                    setAnalyticsState({ startTime: Date.now(), pageTimes: {}, interactions: 0, cardsSeen: new Set(), quizzesAnswered: new Set(), quizScore: 0 });
+                    setAnalyticsState({ startTime: Date.now(), pageTimes: {}, interactions: 0, cardsShown: new Set(), cardsFlipped: new Set(), quizAnswers: {} });
                 }
             };
 
@@ -1337,7 +1396,7 @@
                         {/* Diagnostics Section (Left Side) */}
                         <div className="lg:col-span-3">
                             <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-6 text-[var(--bcg-gold)]">
-                                {lang === 'EN' ? 'Session Diagnostics' : '學習歷程診斷'}
+                                {lang === 'EN' ? 'Session Diagnostics' : '學習歷程總診斷'}
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[var(--bcg-border)] border border-[var(--bcg-border)] mb-8">
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
@@ -1353,30 +1412,62 @@
                                     <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.quiz}</div>
                                 </div>
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold mb-2 break-all">{analytics.cardsSeen.size} <span className="text-lg opacity-50">/ {totalCardsExpected}</span></div>
+                                    <div className="text-4xl font-serif-title font-bold mb-2 break-all">{analytics.cardsFlipped.size} <span className="text-lg opacity-50">/ {totalCardsExpected}</span></div>
                                     <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.cards}</div>
                                 </div>
                             </div>
 
-                            {/* Module Specific Analytics */}
+                            {/* Detailed Module Specific Analytics Breakdown */}
                             <div className="bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] p-6">
-                                <h4 className="text-xs font-bold tracking-widest uppercase mb-4 text-[var(--bcg-gold)]">
-                                    {lang === 'EN' ? 'Module Time Allocation (Sec)' : '各模組停留時間 (秒)'}
+                                <h4 className="text-xs font-bold tracking-widest uppercase mb-6 text-[var(--bcg-gold)]">
+                                    {t.analytics.modDetails}
                                </h4>
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                    {t.nav.map((name, idx) => (
-                                        <div key={idx} className="bg-white/5 p-3 flex flex-col justify-center items-center border border-[var(--bcg-border)]">
-                                            <span className="text-[10px] font-bold opacity-50 mb-1">M{idx}</span>
-                                            <span className="text-sm font-bold text-[var(--bcg-gold)]">{analytics.pageTimes[idx] || 0}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                               <div className="space-y-3">
+                                   {themes.map((theme, i) => {
+                                        const themeIdx = i + 1;
+                                        const totalCards = theme.cards ? theme.cards.length : 0;
+                                        const totalQuizzes = theme.quiz ? theme.quiz.length : 0;
+                                        
+                                        const shownCards = Array.from(analytics.cardsShown).filter(id => id.startsWith(`${themeIdx}-`)).length;
+                                        const flippedCards = Array.from(analytics.cardsFlipped).filter(id => id.startsWith(`${themeIdx}-`)).length;
+                                        
+                                        const moduleQuizAnswers = Object.entries(analytics.quizAnswers).filter(([id]) => id.startsWith(`${themeIdx}-`));
+                                        const answeredQuizzes = moduleQuizAnswers.length;
+                                        const correctQuizzes = moduleQuizAnswers.filter(([_, isC]) => isC).length;
+                                        const timeSec = analytics.pageTimes[themeIdx] || 0;
+
+                                        return (
+                                            <div key={themeIdx} className="bg-white/5 border border-[var(--bcg-border)] p-4 flex flex-col md:flex-row justify-between md:items-center gap-4 transition hover:border-[var(--bcg-gold)]">
+                                                <div className="md:w-1/3">
+                                                    <span className="text-[10px] font-bold opacity-50 block mb-1">M{themeIdx}</span>
+                                                    <span className="text-sm font-bold text-[var(--bcg-gold)]">{theme.title}</span>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-4 md:w-2/3 text-center">
+                                                    <div>
+                                                        <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{t.analytics.modTime}</div>
+                                                        <div className="text-sm font-bold">{timeSec}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{t.analytics.modCards}</div>
+                                                        <div className="text-sm font-bold">{flippedCards} / {shownCards} / {totalCards}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{t.analytics.modQuiz}</div>
+                                                        <div className={`text-sm font-bold ${correctQuizzes === totalQuizzes && totalQuizzes > 0 ? 'text-[var(--bcg-green)]' : ''}`}>
+                                                            {correctQuizzes} / {answeredQuizzes} / {totalQuizzes}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                   })}
+                               </div>
                             </div>
                         </div>
 
                         {/* Export & Profile Section (Right Side) */}
                         <div className="lg:col-span-2 space-y-6" aria-hidden="true">
-                            <div className="bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] p-6">
+                            <div className="bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] p-6 sticky top-24">
                                 <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-6 text-[var(--bcg-gold)]">
                                     {lang === 'EN' ? 'Student Profile' : '學生基本資料'}
                                 </h3>
