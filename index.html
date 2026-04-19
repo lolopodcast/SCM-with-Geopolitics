@@ -341,7 +341,7 @@
                         quiz: [
                             { q: "即時生產 (JIT) 的主要策略目標是什麼？", opts: ["擴大倉儲空間需求", "減少庫存並消除生產浪費", "刻意延長前置時間", "無限制擴張勞動力"], ans: 1, feedback: "正確。JIT 透過準時送達物料來將持有成本降至最低。" },
                             { q: "哪個架構可作為跨部門庫存與銷售資料的中央資訊樞紐？", opts: ["TPS", "JIT", "ERP", "TCE"], ans: 2, feedback: "正確。ERP 能即時整合所有跨部門的基礎營運數據。" },
-                            { q: "在交易成本經濟學中，以下何者是關鍵成本因素？", opts: ["搜尋與談判成本", "廠房電費", "行行銷預算", "研發資本支出"], ans: 0, feedback: "正確。TCE 專注於在市場上進行交易的摩擦成本。" },
+                            { q: "在交易成本經濟學中，以下何者是關鍵成本因素？", opts: ["搜尋與談判成本", "廠房電費", "行銷預算", "研發資本支出"], ans: 0, feedback: "正確。TCE 專注於在市場上進行交易的摩擦成本。" },
                             { q: "嚴格控制 WIP 的主要目的是什麼？", opts: ["增加儲存空間", "暴露生產瓶頸並減少浪費", "創造庫存剩餘", "降低員工的工作速度"], ans: 1, feedback: "正確。控制在製品數量是精實製造維持連續流的基礎。" }
                         ]
                     },
@@ -594,13 +594,13 @@
             const isCorrect = Object.keys(placed).length === items.length && items.every(i => placed[i.id] === i.q);
 
             return (
-                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md">
+                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md mb-12">
                     <h3 className="text-2xl font-serif-title font-bold mb-6">{lang==='EN'?'1. Kraljic Strategy Classifier':'1. Kraljic 策略分類器'}</h3>
                     <div className="mb-6">
                         <p className="text-sm opacity-80 mb-4">{lang==='EN'?'Select an item, then click a quadrant to assign it.':'點擊選擇採購項目，再點擊矩陣象限進行分配。'}</p>
                         <div className="flex flex-wrap gap-2">
                             {items.map(i => (
-                                <button key={i.id} onClick={() => setSelectedId(i.id)} 
+                                <button key={i.id} onClick={() => setSelectedId(i.id)} aria-hidden="true"
                                     className={`px-4 py-2 text-sm border transition ${placed[i.id] ? 'opacity-30 border-gray-600' : selectedId === i.id ? 'border-[var(--bcg-gold)] bg-[var(--bcg-gold)]/20' : 'border-[var(--bcg-border)] hover:border-white'}`}>
                                     {i.name} {placed[i.id] && `(${placed[i.id]})`}
                                 </button>
@@ -610,10 +610,10 @@
 
                     <div className="grid grid-cols-2 gap-2 aspect-video max-w-2xl">
                         {quadrants.map(q => (
-                            <button key={q} onClick={() => handlePlace(q)} 
-                                className="flex flex-col items-center justify-center border border-[var(--bcg-border)] bg-black/40 hover:bg-[var(--bcg-accent)] transition relative">
+                            <button key={q} onClick={() => handlePlace(q)} aria-hidden="true"
+                                className="flex flex-col items-center justify-center border border-[var(--bcg-border)] bg-black/40 hover:bg-[var(--bcg-accent)] transition relative min-h-[120px]">
                                 <span className="font-bold text-lg opacity-50 absolute top-4">{q}</span>
-                                <div className="mt-6 flex flex-wrap gap-2 justify-center">
+                                <div className="mt-6 flex flex-wrap gap-2 justify-center px-2">
                                     {items.filter(i => placed[i.id] === q).map(i => (
                                         <span key={i.id} className={`px-2 py-1 text-xs font-bold ${placed[i.id] === i.q ? 'bg-[var(--bcg-green)] text-white' : 'bg-[var(--bcg-red)] text-white'}`}>
                                             {i.name}
@@ -639,10 +639,10 @@
             const eoq = Math.round(Math.sqrt((2 * D * S) / H));
 
             return (
-                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md">
+                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md mb-12">
                     <h3 className="text-2xl font-serif-title font-bold mb-6">{lang==='EN'?'2. Dynamic EOQ Simulator':'2. 動態 EOQ 模擬器'}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <div className="space-y-6">
+                        <div className="space-y-6" aria-hidden="true">
                             <div>
                                 <label className="flex justify-between text-sm font-bold mb-2">
                                     <span>{lang==='EN'?'Annual Demand (D)':'年度總需求量 (D)'}</span> <span>{D}</span>
@@ -662,10 +662,10 @@
                                 <input type="range" min="1" max="50" step="1" value={H} onChange={e=>setH(e.target.value)} className="w-full" />
                             </div>
                         </div>
-                        <div className="flex flex-col items-center justify-center bg-[var(--bcg-primary)] border border-[var(--bcg-gold)] p-8">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--bcg-gold)] mb-2">Optimal Order Quantity</span>
-                            <span className="text-6xl font-serif-title font-bold">{eoq}</span>
-                            <span className="text-sm mt-4 opacity-70">Formula: √(2DS / H)</span>
+                        <div className="flex flex-col items-center justify-center bg-[var(--bcg-primary)] border border-[var(--bcg-gold)] p-8 text-center">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--bcg-gold)] mb-2">{lang === 'EN' ? 'Optimal Order Quantity' : '最佳訂購數量'}</span>
+                            <span className="text-6xl font-serif-title font-bold break-all">{eoq}</span>
+                            <span className="text-sm mt-4 opacity-70">{lang === 'EN' ? 'Formula' : '計算公式'}: √(2DS / H)</span>
                         </div>
                     </div>
                 </div>
@@ -685,14 +685,14 @@
             }).join(' ');
 
             return (
-                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md">
+                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md mb-12">
                     <h3 className="text-2xl font-serif-title font-bold mb-6">{lang==='EN'?'3. PESTEL Radar Evaluator':'3. PESTEL 雷達評估器'}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
+                        <div className="space-y-4" aria-hidden="true">
                             {labels.map((lb, i) => (
                                 <div key={i}>
                                     <label className="flex justify-between text-xs font-bold mb-1">
-                                        <span>{lb} Risk</span> <span>{scores[i]}/10</span>
+                                        <span>{lb} {lang==='EN'?'Risk':'風險'}</span> <span>{scores[i]}/10</span>
                                     </label>
                                     <input type="range" min="1" max="10" value={scores[i]} onChange={e=>updateScore(i, e.target.value)} className="w-full" />
                                 </div>
@@ -727,7 +727,7 @@
                 <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md">
                     <h3 className="text-2xl font-serif-title font-bold mb-6">{lang==='EN'?'4. O2O ROI Calculator':'4. O2O 全通路 ROI 計算機'}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
+                        <div className="space-y-6" aria-hidden="true">
                             <div>
                                 <label className="flex justify-between text-xs font-bold mb-1"><span>{lang==='EN'?'Daily Web Traffic':'每日網站流量'}</span> <span>{traffic}</span></label>
                                 <input type="range" min="100" max="10000" step="100" value={traffic} onChange={e=>setTraffic(e.target.value)} className="w-full" />
@@ -748,15 +748,15 @@
                         <div className="flex flex-col justify-center bg-[var(--bcg-primary)] border border-[var(--bcg-gold)] p-8">
                             <div className="mb-4">
                                 <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{lang==='EN'?'Base Revenue':'基礎營收'}</div>
-                                <div className="text-2xl font-serif-title">${baseRev.toLocaleString()}</div>
+                                <div className="text-2xl font-serif-title break-all">${baseRev.toLocaleString()}</div>
                             </div>
                             <div className="mb-4">
                                 <div className="text-[10px] font-bold uppercase text-[var(--bcg-gold)] mb-1">{lang==='EN'?'Incremental Upsell Revenue':'追加銷售增額營收'}</div>
-                                <div className="text-2xl font-serif-title text-[var(--bcg-gold)]">+ ${upsellRev.toLocaleString()}</div>
+                                <div className="text-2xl font-serif-title text-[var(--bcg-gold)] break-all">+ ${upsellRev.toLocaleString()}</div>
                             </div>
                             <div className="mt-4 pt-4 border-t border-white/20">
                                 <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{lang==='EN'?'Total O2O Revenue':'總計 O2O 營收'}</div>
-                                <div className="text-4xl font-serif-title font-bold">${totalRev.toLocaleString()}</div>
+                                <div className="text-4xl md:text-5xl font-serif-title font-bold break-all">${totalRev.toLocaleString()}</div>
                             </div>
                         </div>
                     </div>
@@ -815,6 +815,7 @@
 
             const trackInteraction = () => setAnalytics(prev => ({ ...prev, interactions: prev.interactions + 1 }));
 
+            // 語音導覽 (Voice Navigation) with filtering logic
             const [isSpeaking, setIsSpeaking] = useState(false);
             const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
             
@@ -827,10 +828,16 @@
                 const voices = synth.getVoices();
                 if (lang === 'EN') {
                     msg.lang = 'en-GB';
-                    msg.voice = voices.find(v => v.lang === 'en-GB' && v.name.includes('Male')) || voices.find(v => v.lang === 'en-GB') || voices[0];
+                    msg.voice = voices.find(v => v.lang === 'en-GB' && (v.name.includes('Male') || v.name.includes('George'))) 
+                             || voices.find(v => v.lang === 'en-GB') 
+                             || voices.find(v => v.lang.startsWith('en')) 
+                             || voices[0];
                 } else {
                     msg.lang = 'zh-TW';
-                    msg.voice = voices.find(v => v.lang === 'zh-TW' && (v.name.includes('Yating') || v.name.includes('Han'))) || voices.find(v => v.lang === 'zh-TW') || voices[0];
+                    msg.voice = voices.find(v => v.lang === 'zh-TW' && (v.name.includes('Yating') || v.name.includes('Han') || v.name.includes('Hsiao'))) 
+                             || voices.find(v => v.lang === 'zh-TW') 
+                             || voices.find(v => v.lang.startsWith('zh')) 
+                             || voices[0];
                 }
 
                 msg.onend = () => setIsSpeaking(false);
@@ -846,8 +853,15 @@
                     if (synth.paused) { synth.resume(); setIsSpeaking(true); } 
                     else { synth.pause(); setIsSpeaking(false); }
                 } else {
-                    const contentDiv = document.getElementById('readable-content');
-                    if (contentDiv) speak(contentDiv.innerText);
+                    // Clone the container to strip out buttons and ui-elements before reading
+                    const container = document.getElementById('readable-content');
+                    if (container) {
+                        const clone = container.cloneNode(true);
+                        // Remove all explicitly hidden aria elements (buttons, ranges, etc)
+                        const hiddenElements = clone.querySelectorAll('[aria-hidden="true"], button, input, select');
+                        hiddenElements.forEach(el => el.parentNode && el.parentNode.removeChild(el));
+                        speak(clone.innerText);
+                    }
                 }
             };
             const stopVoice = () => { if (synth) { synth.cancel(); setIsSpeaking(false); } };
@@ -941,7 +955,7 @@
                     )}
 
                     {/* ===== MAIN CONTENT ===== */}
-                    <main id="readable-content" className="pt-28 pb-20 px-6 lg:px-12 max-w-4xl mx-auto w-full flex-grow">
+                    <main id="readable-content" className="pt-28 pb-20 px-6 lg:px-12 max-w-5xl mx-auto w-full flex-grow">
                         {currentPage === 0 && <PageSummary t={t} lang={lang} navigateTo={navigateTo} />}
                         {currentPage >= 1 && currentPage <= 6 && (
                             <PageTheme 
@@ -981,18 +995,18 @@
                     <p className="text-base md:text-lg leading-relaxed whitespace-pre-line opacity-90 font-light">{t.summary.desc}</p>
                 </div>
 
-                <div className="mb-16 ui-protect"><SvgOverview lang={lang} /></div>
+                <div className="mb-16 ui-protect" aria-hidden="true"><SvgOverview lang={lang} /></div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-[var(--bcg-border)] border border-[var(--bcg-border)] ui-protect">
                     {t.nav.slice(1, 10).map((item, idx) => (
-                        <button key={idx} onClick={() => navigateTo(idx + 1)} className="group p-8 bg-[var(--bcg-gray-dark)] dark:bg-[var(--bcg-primary)] hover:bg-[var(--bcg-accent)] text-left transition-colors relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                        <button key={idx} onClick={() => navigateTo(idx + 1)} aria-hidden="true" className="group p-8 bg-[var(--bcg-gray-dark)] dark:bg-[var(--bcg-primary)] hover:bg-[var(--bcg-accent)] text-left transition-colors relative overflow-hidden flex flex-col justify-between min-h-[140px]">
                             <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-3 block">Theme 0{idx + 1}</span>
                             <h3 className="font-serif-title font-bold text-lg text-white">{item.split('. ')[1] || item}</h3>
                         </button>
                     ))}
                 </div>
                 <div className="flex justify-end pt-8 ui-protect">
-                    <button onClick={() => navigateTo(1)} className="px-6 py-3 bg-[var(--bcg-gold)] text-black text-xs font-bold tracking-widest uppercase hover:bg-opacity-90 transition">{t.btn.next}</button>
+                    <button onClick={() => navigateTo(1)} aria-hidden="true" className="px-6 py-3 bg-[var(--bcg-gold)] text-black text-xs font-bold tracking-widest uppercase hover:bg-opacity-90 transition">{t.btn.next}</button>
                 </div>
             </div>
         );
@@ -1066,7 +1080,7 @@
                         <p className="text-lg font-serif-title italic opacity-80">{theme.overview}</p>
                     </header>
 
-                    <div className="flex flex-wrap gap-2 mb-10 ui-protect">
+                    <div className="flex flex-wrap gap-2 mb-10 ui-protect" aria-hidden="true">
                         {(theme.highlights || []).map((h, i) => (
                             <span key={i} className="px-3 py-1 bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase rounded-sm">{h}</span>
                         ))}
@@ -1079,17 +1093,17 @@
                         </div>
                     </section>
 
-                    <div className="mb-16 ui-protect">
+                    <div className="mb-16 ui-protect" aria-hidden="true">
                         {renderSvg()}
                     </div>
 
                     {/* Flashcards */}
                     <section className="mb-16 ui-protect">
-                        <div className="flex items-center justify-between mb-4 border-b-2 border-[var(--bcg-primary)] dark:border-white pb-2">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 border-b-2 border-[var(--bcg-primary)] dark:border-white pb-2 gap-2">
                             <h3 className="text-sm font-bold tracking-widest uppercase">{t.btn.flashcards}</h3>
-                            <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest opacity-60">
+                            <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest opacity-60" aria-hidden="true">
                                 <span>{t.btn.read}: {seenCardsInTheme}/{totalCardsInTheme}</span>
-                                <span>|</span>
+                                <span className="hidden sm:inline">|</span>
                                 <span>View: {cardPage * 2 + 1}-{Math.min((cardPage + 1) * 2, totalCardsInTheme)} / {totalCardsInTheme}</span>
                             </div>
                         </div>
@@ -1101,12 +1115,12 @@
                                     <div key={globalIndex} className="perspective-1000 h-64 cursor-pointer group" onClick={() => handleFlip(globalIndex)}>
                                         <div className={`relative w-full h-full transform-style-3d flip-transition ${flipped ? 'rotate-y-180' : ''}`}>
                                             <div className="absolute inset-0 backface-hidden bg-[var(--bcg-primary)] text-white p-8 flex flex-col justify-between border-t-4 border-[var(--bcg-gold)]">
-                                                <span className="text-[10px] font-bold tracking-widest uppercase opacity-50">Concept {globalIndex + 1}</span>
+                                                <span className="text-[10px] font-bold tracking-widest uppercase opacity-50" aria-hidden="true">Concept {globalIndex + 1}</span>
                                                 <h4 className="text-2xl font-serif-title font-bold text-center group-hover:scale-105 transition-transform">{card.term}</h4>
-                                                <div className="flex justify-center opacity-50"><Icon name="repeat" className="w-4 h-4" /></div>
+                                                <div className="flex justify-center opacity-50" aria-hidden="true"><Icon name="repeat" className="w-4 h-4" /></div>
                                             </div>
                                             <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white text-black p-8 flex flex-col items-center justify-center text-center border border-[var(--bcg-border)] border-t-4 border-[var(--bcg-accent)]">
-                                                <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-accent)] mb-4">{card.term}</span>
+                                                <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-accent)] mb-4" aria-hidden="true">{card.term}</span>
                                                 <p className="text-sm leading-relaxed font-medium">{card.def}</p>
                                             </div>
                                         </div>
@@ -1115,7 +1129,7 @@
                             })}
                         </div>
                         <div className="flex justify-end mt-6 space-x-3">
-                            <button onClick={() => { setCardPage((cardPage + 1) % Math.ceil(totalCardsInTheme / 2)); }} className="px-5 py-2 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[var(--bcg-accent)] transition border border-[var(--bcg-gold)]">
+                            <button onClick={() => { setCardPage((cardPage + 1) % Math.ceil(totalCardsInTheme / 2)); }} aria-hidden="true" className="px-5 py-2 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[var(--bcg-accent)] transition border border-[var(--bcg-gold)]">
                                 {t.btn.nextCards}
                             </button>
                         </div>
@@ -1128,12 +1142,12 @@
                     </section>
 
                     {/* Quiz Block */}
-                    <section className="mb-16 border border-[var(--bcg-border)] p-8 bg-black/5 dark:bg-white/5 ui-protect">
-                        <div className="flex items-center justify-between mb-8 border-b border-[var(--bcg-border)] pb-4">
+                    <section className="mb-16 border border-[var(--bcg-border)] p-4 sm:p-8 bg-black/5 dark:bg-white/5 ui-protect">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 border-b border-[var(--bcg-border)] pb-4 gap-2">
                             <h3 className="text-sm font-bold tracking-widest uppercase text-[var(--bcg-gold)]">{t.btn.check}</h3>
-                            <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest opacity-60">
+                            <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest opacity-60" aria-hidden="true">
                                 <span>{t.btn.answered}: {answeredQuizInTheme}/{totalQuizInTheme}</span>
-                                <span>|</span>
+                                <span className="hidden sm:inline">|</span>
                                 <span>View: {quizPage * 2 + 1}-{Math.min((quizPage + 1) * 2, totalQuizInTheme)} / {totalQuizInTheme}</span>
                             </div>
                         </div>
@@ -1147,7 +1161,7 @@
                                 return (
                                     <div key={globalIndex}>
                                         <h4 className="text-lg font-serif-title font-bold mb-6">
-                                            <span className="text-[var(--bcg-gold)] mr-2">Q{globalIndex + 1}.</span>{q.q}
+                                            <span className="text-[var(--bcg-gold)] mr-2" aria-hidden="true">Q{globalIndex + 1}.</span>{q.q}
                                         </h4>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {q.opts.map((opt, oIndex) => {
@@ -1161,7 +1175,7 @@
                                                 }
                                                 return (
                                                     <button key={oIndex} onClick={() => handleQuizAnswer(qIndex, oIndex)} className={btnClass} disabled={answeredIdx !== undefined}>
-                                                        <span className="inline-block w-6 font-bold opacity-50">{String.fromCharCode(65 + oIndex)}.</span> {opt}
+                                                        <span className="inline-block w-6 font-bold opacity-50" aria-hidden="true">{String.fromCharCode(65 + oIndex)}.</span> {opt}
                                                     </button>
                                                 );
                                             })}
@@ -1176,7 +1190,7 @@
                                 );
                             })}
                         </div>
-                        <div className="flex justify-end mt-10 space-x-3 ui-protect">
+                        <div className="flex justify-end mt-10 space-x-3 ui-protect" aria-hidden="true">
                             <button onClick={resetQuiz} className="px-5 py-2 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 transition">{t.btn.retry}</button>
                             <button onClick={() => setQuizPage((quizPage + 1) % Math.ceil(totalQuizInTheme / 2))} className="px-5 py-2 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[var(--bcg-accent)] transition border border-[var(--bcg-gold)]">
                                 {t.btn.nextQuiz}
@@ -1184,12 +1198,12 @@
                         </div>
                     </section>
 
-                    <div className="flex items-center justify-between pt-6 border-t border-[var(--bcg-border)] ui-protect">
-                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                    <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-[var(--bcg-border)] ui-protect gap-4" aria-hidden="true">
+                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition w-full sm:w-auto justify-center">
                             <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
                         </button>
                         {themeIdx < 6 && (
-                            <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                            <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition w-full sm:w-auto justify-center">
                                 <span>{t.btn.next}</span><Icon name="arrow-right" className="w-4 h-4" />
                             </button>
                         )}
@@ -1214,11 +1228,11 @@
                         <LabO2O lang={lang} />
                     </div>
 
-                    <div className="flex items-center justify-between pt-10 border-t border-[var(--bcg-border)] mt-16">
-                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                    <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-[var(--bcg-border)] ui-protect gap-4 mt-16" aria-hidden="true">
+                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition w-full sm:w-auto justify-center">
                             <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
                         </button>
-                        <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                        <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition w-full sm:w-auto justify-center">
                             <span>{t.btn.next}</span><Icon name="arrow-right" className="w-4 h-4" />
                         </button>
                     </div>
@@ -1238,18 +1252,18 @@
                         {t.resources.items.map((item, idx) => (
                             <li key={idx} onClick={track} className="flex items-center gap-4 py-6 group cursor-pointer hover:bg-[var(--bcg-gold)]/10 transition px-4">
                                 <span className="text-[10px] font-bold tracking-widest opacity-30 w-6">0{idx+1}</span>
-                                <span className="font-serif-title font-bold text-lg flex-grow">{item}</span>
+                                <span className="font-serif-title font-bold text-base sm:text-lg flex-grow">{item}</span>
                                 <Icon name="external-link" className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-[var(--bcg-gold)]" />
                             </li>
                         ))}
                     </ul>
                 </div>
 
-                <div className="flex items-center justify-between pt-6 border-t border-[var(--bcg-border)]">
-                    <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-[var(--bcg-border)] ui-protect gap-4" aria-hidden="true">
+                    <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition w-full sm:w-auto justify-center">
                         <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
                     </button>
-                    <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                    <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition w-full sm:w-auto justify-center">
                         <span>{t.btn.next}</span><Icon name="arrow-right" className="w-4 h-4" />
                     </button>
                 </div>
@@ -1322,29 +1336,33 @@
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-16">
                         {/* Diagnostics Section (Left Side) */}
                         <div className="lg:col-span-3">
-                            <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-6 text-[var(--bcg-gold)]">Session Diagnostics</h3>
-                            <div className="grid grid-cols-2 gap-px bg-[var(--bcg-border)] border border-[var(--bcg-border)] mb-8">
+                            <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-6 text-[var(--bcg-gold)]">
+                                {lang === 'EN' ? 'Session Diagnostics' : '學習歷程診斷'}
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[var(--bcg-border)] border border-[var(--bcg-border)] mb-8">
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold text-[var(--bcg-gold)] mb-2">{analytics.interactions}</div>
+                                    <div className="text-4xl font-serif-title font-bold text-[var(--bcg-gold)] mb-2 break-all">{analytics.interactions}</div>
                                     <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.interactions}</div>
                                 </div>
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold text-[var(--bcg-accent)] mb-2">{sessionTime}s</div>
+                                    <div className="text-4xl font-serif-title font-bold text-[var(--bcg-accent)] mb-2 break-all">{sessionTime}s</div>
                                     <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.time}</div>
                                 </div>
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold mb-2">{quizAcc}%</div>
+                                    <div className="text-4xl font-serif-title font-bold mb-2 break-all">{quizAcc}%</div>
                                     <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.quiz}</div>
                                 </div>
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold mb-2">{analytics.cardsSeen.size} <span className="text-lg opacity-50">/ {totalCardsExpected}</span></div>
+                                    <div className="text-4xl font-serif-title font-bold mb-2 break-all">{analytics.cardsSeen.size} <span className="text-lg opacity-50">/ {totalCardsExpected}</span></div>
                                     <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.cards}</div>
                                 </div>
                             </div>
 
                             {/* Module Specific Analytics */}
                             <div className="bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] p-6">
-                                <h4 className="text-xs font-bold tracking-widest uppercase mb-4 text-[var(--bcg-gold)]">Module Time Allocation (Sec)</h4>
+                                <h4 className="text-xs font-bold tracking-widest uppercase mb-4 text-[var(--bcg-gold)]">
+                                    {lang === 'EN' ? 'Module Time Allocation (Sec)' : '各模組停留時間 (秒)'}
+                               </h4>
                                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                                     {t.nav.map((name, idx) => (
                                         <div key={idx} className="bg-white/5 p-3 flex flex-col justify-center items-center border border-[var(--bcg-border)]">
@@ -1357,9 +1375,11 @@
                         </div>
 
                         {/* Export & Profile Section (Right Side) */}
-                        <div className="lg:col-span-2 space-y-6">
+                        <div className="lg:col-span-2 space-y-6" aria-hidden="true">
                             <div className="bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] p-6">
-                                <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-6 text-[var(--bcg-gold)]">Student Profile</h3>
+                                <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-6 text-[var(--bcg-gold)]">
+                                    {lang === 'EN' ? 'Student Profile' : '學生基本資料'}
+                                </h3>
                                 <div className="space-y-6 mb-8">
                                     <div>
                                         <label className="block text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2">{t.analytics.group} *</label>
@@ -1390,8 +1410,8 @@
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-6 border-t border-[var(--bcg-border)]">
-                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                    <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-[var(--bcg-border)] ui-protect gap-4" aria-hidden="true">
+                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition w-full sm:w-auto justify-center">
                             <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
                         </button>
                     </div>
