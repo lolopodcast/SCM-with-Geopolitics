@@ -250,7 +250,16 @@
                     }
                 ],
                 lab: { title: "Strategy Lab", kicker: "7. INTERACTIVE MODULES", desc: "Apply strategic frameworks to real-world operational scenarios." },
-                resources: { title: "External Resources", kicker: "8. LITERATURE & INSIGHTS", items: ["Financial Times: Macro-geopolitical energy impact", "Reuters: ASEAN strategic trade dimensions", "Bloomberg: Supply Chain Foundation Reports", "Focus Taiwan: Tariff frameworks on SMEs"] },
+                resources: { 
+                    title: "External Resources", kicker: "8. LITERATURE & INSIGHTS", 
+                    items: [
+                        { title: "Purchasing Must Become Supply Management (Peter Kraljic)", source: "Harvard Business Review", url: "https://hbr.org/1983/09/purchasing-must-become-supply-management" },
+                        { title: "Designing Resilience into Global Supply Chains", source: "BCG", url: "https://www.bcg.com/capabilities/operations/supply-chain" },
+                        { title: "Toyota Production System (TPS) Basic Concept", source: "Toyota Global", url: "https://global.toyota/en/company/vision-and-philosophy/production-system/" },
+                        { title: "Top Trends in Supply Chain Technology", source: "Gartner", url: "https://www.gartner.com/en/supply-chain/trends/supply-chain-technology" },
+                        { title: "Omnichannel Retail & O2O Strategies", source: "Retail Dive", url: "https://www.retaildive.com/topic/omnichannel/" }
+                    ] 
+                },
                 analytics: { 
                     title: "Analytics Dashboard", kicker: "9. PERFORMANCE METRICS", 
                     group: "Group / Cohort", studentId: "Student ID No.", name: "Full Name", 
@@ -393,7 +402,16 @@
                     }
                 ],
                 lab: { title: "策略實驗室", kicker: "7. INTERACTIVE MODULES", desc: "將策略架構應用於真實世界的營運情境中進行互動演練。" },
-                resources: { title: "外部學習資源", kicker: "8. LITERATURE & INSIGHTS", items: ["Financial Times: 總體地緣政治對能源的衝擊", "Reuters: 東協策略性貿易構面", "Bloomberg: 供應鏈基礎韌性報告", "Focus Taiwan: 關稅架構對中小企業的影響"] },
+                resources: { 
+                    title: "外部學習資源", kicker: "8. LITERATURE & INSIGHTS", 
+                    items: [
+                        { title: "採購必須成為供應管理 (Kraljic 經典文獻)", source: "哈佛商業評論 (HBR)", url: "https://hbr.org/1983/09/purchasing-must-become-supply-management" },
+                        { title: "將韌性設計融入全球供應鏈", source: "波士頓顧問集團 (BCG)", url: "https://www.bcg.com/capabilities/operations/supply-chain" },
+                        { title: "豐田生產系統 (TPS) 核心概念", source: "Toyota Global", url: "https://global.toyota/en/company/vision-and-philosophy/production-system/" },
+                        { title: "供應鏈科技與 AI 頂尖趨勢", source: "Gartner", url: "https://www.gartner.com/en/supply-chain/trends/supply-chain-technology" },
+                        { title: "全通路零售與 O2O 整合策略", source: "Retail Dive", url: "https://www.retaildive.com/topic/omnichannel/" }
+                    ] 
+                },
                 analytics: { 
                     title: "學習歷程分析", kicker: "9. PERFORMANCE METRICS", 
                     group: "所屬組別", studentId: "學號 (ID)", name: "真實姓名", 
@@ -1293,10 +1311,15 @@
                 <div className="border-t-2 border-[var(--bcg-primary)] dark:border-white mb-16">
                     <ul className="divide-y divide-[var(--bcg-border)]">
                         {t.resources.items.map((item, idx) => (
-                            <li key={idx} onClick={track} className="flex items-center gap-4 py-6 group cursor-pointer hover:bg-[var(--bcg-gold)]/10 transition px-4">
-                                <span className="text-[10px] font-bold tracking-widest opacity-30 w-6">0{idx+1}</span>
-                                <span className="font-serif-title font-bold text-base sm:text-lg flex-grow">{item}</span>
-                                <Icon name="external-link" className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-[var(--bcg-gold)]" />
+                            <li key={idx} className="group transition px-4 hover:bg-[var(--bcg-gold)]/10">
+                                <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={track} className="flex items-center gap-4 py-6 w-full cursor-pointer outline-none">
+                                    <span className="text-[10px] font-bold tracking-widest opacity-30 w-6">0{idx+1}</span>
+                                    <div className="flex-grow">
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--bcg-gold)] mb-1">{item.source}</div>
+                                        <div className="font-serif-title font-bold text-base sm:text-lg">{item.title}</div>
+                                    </div>
+                                    <Icon name="external-link" className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-[var(--bcg-gold)]" />
+                                </a>
                             </li>
                         ))}
                     </ul>
