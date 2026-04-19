@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geopolitics & SCM Learning SPA | Prof. Shihmin Lo</title>
+    <title>Global SCM Strategy | Prof. Shihmin Lo</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -13,20 +13,22 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Typography: Editorial Serif + Clean Sans -->
+    <!-- DOMPurify (Security) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <!-- Typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:ital,wght@0,300;0,700;1,300&family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@300;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Strict BCG/McKinsey Professional Color Palette */
+        /* BCG Professional Color Palette (0412 Version) */
         :root {
-            --bcg-primary: #031D38; /* Deep Oxford Blue */
-            --bcg-accent: #005073;  /* Consulting Teal/Blue */
+            --bcg-primary: #0A2318; /* Deep BCG Green */
+            --bcg-accent: #114B2C;  /* Lighter Corporate Green */
             --bcg-gray-light: #F4F5F7;
-            --bcg-gray-dark: #1E2327;
-            --bcg-gold: #B69A54;    /* Refined Champagne Gold */
-            --bcg-red: #A8201A;
-            --bcg-green: #1F6038;
-            --bcg-border: rgba(150, 150, 150, 0.25);
+            --bcg-gray-dark: #121815; /* Dark background tinted with green */
+            --bcg-gold: #A38B41;    /* Refined Champagne Gold */
+            --bcg-red: #8B1E19;
+            --bcg-green: #248232;
+            --bcg-border: rgba(163, 139, 65, 0.3); /* Gold tinted border */
         }
 
         body {
@@ -37,145 +39,133 @@
             letter-spacing: 0.01em;
         }
 
-        /* Editorial Typography Classes */
-        .font-serif-title {
-            font-family: 'Merriweather', 'Noto Serif TC', serif;
-        }
+        .font-serif-title { font-family: 'Merriweather', 'Noto Serif TC', serif; }
 
-        /* Dark Mode Setup */
         body.dark {
             background-color: var(--bcg-gray-dark);
             color: #E2E4E9;
-            --bcg-border: rgba(255, 255, 255, 0.1);
+            --bcg-border: rgba(163, 139, 65, 0.25);
         }
         body.light {
             background-color: #FFFFFF;
             color: #111820;
-            --bcg-border: rgba(0, 0, 0, 0.1);
+            --bcg-border: rgba(10, 35, 24, 0.15);
         }
 
-        /* Anti-Selection & Drag Prevention */
-        .select-none {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+        /* Protection Classes */
+        .ui-protect {
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
             -webkit-user-drag: none;
         }
-
-        /* Flip Card 3D Setup - Sharp Edges */
+        
+        /* Interactive Elements */
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
-        .flip-transition { transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+        .flip-transition { transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* Custom Corporate Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(136, 136, 136, 0.4); }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(136, 136, 136, 0.7); }
-
-        /* Animations */
+        ::-webkit-scrollbar-thumb { background: var(--bcg-gold); opacity: 0.5; }
+        
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade { animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* Domain Lock Overlay */
         #domain-lock-overlay {
-            display: none;
-            position: fixed; inset: 0;
-            background: #000; color: #FFF;
-            z-index: 10000;
+            display: none; position: fixed; inset: 0; background: #000; color: #FFF; z-index: 10000;
             flex-direction: column; justify-content: center; align-items: center;
-            font-size: 1.5rem; font-weight: bold;
-            font-family: 'Inter', sans-serif;
+            font-size: 1.5rem; font-family: 'Inter', sans-serif;
         }
-
-        /* Form Reset for Select */
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
+        
+        /* Range Sliders */
+        input[type=range] {
+            accent-color: var(--bcg-gold);
         }
     </style>
 </head>
-<body class="dark select-none" onselectstart="return false">
-    <!-- Domain Lock Screen -->
+<body class="dark">
+    <!-- Domain Lock & Iframe Busting -->
     <div id="domain-lock-overlay">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A8201A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 24px;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span class="font-serif-title text-2xl tracking-wide">Unauthorized Domain / 網域未授權</span>
-        <span style="font-size: 0.9rem; margin-top: 12px; color: #888; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em;">Redirecting to official website...</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A38B41" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 24px;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span class="font-serif-title text-2xl tracking-wide text-[var(--bcg-gold)]">Unauthorized Access / 授權異常</span>
+        <span style="font-size: 0.9rem; margin-top: 12px; color: #888;">Intellectual Property of Prof. Shihmin Lo</span>
     </div>
+    <script>
+        try {
+            const isPreview = window.location.href.includes("usercontent.goog") || window.location.href.startsWith("blob:");
+            if (window.top !== window.self && !isPreview) {
+                window.top.location = window.self.location;
+            }
+            const DOMAINS = ["lolopodcast.github.io", "localhost", "127.0.0.1", ""];
+            if (!DOMAINS.includes(window.location.hostname) && !isPreview) {
+                document.getElementById('domain-lock-overlay').style.display = 'flex';
+            }
+        } catch (e) {
+            console.warn("Security check bypassed due to cross-origin iframe sandbox restrictions.");
+        }
+    </script>
 
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback, useRef } = React;
+        const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
         // ==========================================
-        // 1. SECURITY: DOMAIN LOCK & HOTKEYS
-        // ==========================================
-        const EXPECTED_DOMAIN = "lolopodcast.github.io"; 
-        if (window.location.hostname !== EXPECTED_DOMAIN && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" && window.location.hostname !== "") {
-            // 啟用網域白名單攔截
-            document.getElementById('domain-lock-overlay').style.display = 'flex';
-            setTimeout(() => window.location.href = "https://" + EXPECTED_DOMAIN, 3000);
-        }
-
-        // ==========================================
-        // 2. CONTENT DICTIONARY (EN & ZH)
+        // 1. DICTIONARY
         // ==========================================
         const CONTENT = {
             EN: {
-                brand: "Global SCM Strategy",
-                nav: ["0. Overview", "1. Geopolitics & PESTEL", "2. Kraljic Matrix", "3. Contract & SRM", "4. Lean & SCM", "5. AI & Demand", "6. Retail & O2O", "7. Strategy Lab", "8. Insights & Resources", "9. Analytics"],
+                brand: "SCM",
+                brandFull: "Global SCM Strategy",
+                nav: ["0. Overview", "1. Geopolitics & PESTEL", "2. Kraljic Matrix", "3. Contract & SRM", "4. Lean & SCM", "5. AI & Demand", "6. Retail & O2O", "7. Strategy Lab", "8. External Resources", "9. Analytics"],
                 summary: {
                     title: "Executive Course Overview",
                     kicker: "0. PROGRAM SUMMARY",
-                    desc: "This intensive 6-hour Executive Development Program (EDP) bridges the critical gap between macro-level geopolitical shifts and highly practical supply chain and retail channel strategies. In an era defined by extreme volatility—marked by events such as the Russia-Ukraine conflict, US-China trade tensions, and unpredictable tariff implementations—businesses can no longer rely purely on cost-centric procurement models. \n\nThe curriculum is meticulously structured to transition leaders toward resilience-centric operations. We fuse classical strategic frameworks, including the PESTEL analysis and Peter Kraljic’s Purchasing Portfolio Matrix, with modern digital imperatives. Participants will delve deep into Supplier Relationship Management (SRM), mastering the art of contract design to mitigate risk through force majeure and SLA clauses. Furthermore, the program explores Lean Production, JIT methodologies, and cutting-edge AI applications in demand forecasting and O2O (Online-to-Offline) retail channel integration. Designed specifically for SME executives, this learning journey equips you with actionable toolkits to safeguard margins, enhance transparency, and sustain competitive advantages in a disrupted global ecosystem.",
+                    desc: "This intensive Executive Development Program (EDP) bridges the critical gap between macro-environmental geopolitical shifts and highly practical supply chain and retail strategies. In an era defined by extreme volatility—marked by events such as the Russia-Ukraine conflict, US-China trade tensions, and unpredictable tariff implementations—businesses can no longer rely purely on cost-centric procurement models. The foundational architecture of global trade has fundamentally shifted.\n\nThe curriculum is meticulously structured to transition leaders toward resilience-centric operations. We fuse classical strategic frameworks, including the PESTEL dimensions and Peter Kraljic’s Purchasing Portfolio Matrix, with modern digital imperatives. Participants will delve deep into Supplier Relationship Management (SRM), mastering the art of contract design to mitigate risk through force majeure and SLA clauses.\n\nFurthermore, the program explores Lean Production, JIT methodologies, and cutting-edge AI applications in demand forecasting and O2O (Online-to-Offline) retail integration. Designed specifically for enterprise executives, this learning journey equips you with actionable toolkits to safeguard margins, enhance transparency, and sustain competitive advantages across multiple dimensions of a disrupted global ecosystem.",
                 },
                 themes: [
                     {
-                        title: "Global Geopolitical Impact & PESTEL",
+                        title: "Macro-Geopolitical Impact & PESTEL",
                         kicker: "1. MACRO-ENVIRONMENTAL THREATS",
-                        overview: "Deconstructing macro-environmental threats to global supply chains.",
-                        highlights: ["PESTEL Framework", "Russia-Ukraine Impact", "China-US Rivalry", "Risk Mapping"],
-                        desc: "The contemporary supply chain is profoundly intertwined with global geopolitics. Decisions made in political capitals instantly ripple through manufacturing hubs. A prime example is the Russia-Ukraine conflict, which fundamentally disrupted Europe's energy grid and raw material availability, forcing manufacturers to hastily redesign their sourcing geographies. To navigate this complexity, procurement leaders must adopt the PESTEL framework—analyzing Political, Economic, Social, Technological, Environmental, and Legal factors—as a core diagnostic mechanism rather than a theoretical exercise.\n\nSimultaneously, the strategic rivalry between the US and China introduces immense friction. Issues ranging from semiconductor export controls to South China Sea disputes and potential US tariffs have catalyzed 'China Plus One' strategies. Taiwanese SMEs, particularly in electronics and precision machinery, are actively mapping geopolitical risks to identify alternative manufacturing bases in ASEAN nations like Vietnam and India.\n\nUltimately, proactive risk management requires shifting from static purchasing to dynamic, intelligence-driven orchestration. Recognizing geographical bottlenecks and deploying multi-sourcing strategies are no longer optional, but essential survival tactics.",
-                        wrapUp: "Geopolitical risk is the new baseline. PESTEL provides the structured lens required to transform global uncertainty into strategic foresight.",
+                        overview: "Deconstructing macro-environmental threats to global supply networks.",
+                        highlights: ["PESTEL Architecture", "Russia-Ukraine Impact", "China-US Rivalry", "Risk Mapping"],
+                        desc: "The contemporary supply chain is profoundly intertwined with global geopolitics. Decisions made in political capitals instantly ripple through manufacturing hubs. A prime example is the Russia-Ukraine conflict, which fundamentally disrupted Europe's energy grid and raw material availability, forcing manufacturers to hastily redesign their sourcing geographies. To navigate this complexity, procurement leaders must adopt the PESTEL architecture—analyzing Political, Economic, Social, Technological, Environmental, and Legal dimensions—as a core diagnostic mechanism rather than a theoretical exercise.\n\nSimultaneously, the strategic rivalry between the US and China introduces immense friction at the foundational level of trade. Issues ranging from semiconductor export controls to South China Sea disputes and potential US tariffs have catalyzed 'China Plus One' strategies. Enterprises are actively mapping geopolitical risks to identify alternative manufacturing bases in ASEAN nations.\n\nUltimately, proactive risk management requires shifting from static purchasing to dynamic, intelligence-driven orchestration. Recognizing geographical bottlenecks and deploying multi-sourcing strategies are no longer optional, but essential survival tactics for maintaining resilience in multiple dimensions.",
+                        wrapUp: "Geopolitical risk is the new baseline. PESTEL provides the structured architecture required to transform global uncertainty into strategic foresight.",
                         cards: [
-                            { term: "PESTEL Analysis", def: "A strategic tool to analyze macro-environmental factors: Political, Economic, Social, Tech, Environmental, Legal." },
-                            { term: "Risk Mapping", def: "Visualizing global supply networks to identify geographical vulnerabilities and choke points." },
-                            { term: "China Plus One", def: "A business strategy avoiding investing only in China by diversifying into other countries." },
-                            { term: "Friend-shoring", def: "Sourcing raw materials and manufacturing within allied or friendly countries to ensure security." }
+                            { term: "PESTEL Architecture", def: "A strategic framework analyzing macro dimensions: Political, Economic, Social, Tech, Environmental, Legal." },
+                            { term: "Risk Mapping", def: "Visualizing global networks to identify geographical vulnerabilities at the foundation." },
+                            { term: "China Plus One", def: "A macro strategy diversifying investments away from single-nation dependency." },
+                            { term: "Friend-shoring", def: "Sourcing raw materials within allied countries to ensure strategic security." }
                         ],
                         quiz: [
-                            { q: "Which event critically disrupted Europe's energy and raw material supply chain recently?", opts: ["Suez Canal Blockage", "Russia-Ukraine War", "US Election", "Brexit"], ans: 1, feedback: "Correct. The conflict caused massive energy crises across European manufacturing." },
-                            { q: "What does the 'E' in PESTEL stand for?", opts: ["Energy", "Engineering", "Economic", "Efficiency"], ans: 2, feedback: "Correct. It stands for Economic (and the second E is Environmental)." },
-                            { q: "Which region is often targeted in 'China Plus One' strategies?", opts: ["Eastern Europe", "ASEAN", "South America", "Middle East"], ans: 1, feedback: "Correct. ASEAN countries like Vietnam are prime alternatives." },
-                            { q: "What is the primary goal of geopolitical risk mapping?", opts: ["Reduce taxes", "Visualize choke points", "Increase marketing", "Hire talent"], ans: 1, feedback: "Correct. It helps visualize and prepare for supply chain vulnerabilities." }
+                            { q: "Which event critically disrupted Europe's macro energy supply?", opts: ["Suez Canal Blockage", "Russia-Ukraine War", "US Election", "Brexit"], ans: 1, feedback: "Correct. The conflict caused massive energy crises." },
+                            { q: "What does the 'E' in PESTEL stand for?", opts: ["Energy", "Engineering", "Economic", "Efficiency"], ans: 2, feedback: "Correct. It stands for Economic (and Environmental)." },
+                            { q: "Which region is often targeted in 'China Plus One'?", opts: ["Eastern Europe", "ASEAN", "South America", "Middle East"], ans: 1, feedback: "Correct. ASEAN countries are prime alternatives." },
+                            { q: "What is the primary goal of geopolitical risk mapping?", opts: ["Reduce taxes", "Visualize strategic bottlenecks", "Increase marketing", "Hire talent"], ans: 1, feedback: "Correct. It helps visualize supply chain vulnerabilities." }
                         ]
                     },
                     {
                         title: "Procurement Strategy & Kraljic Matrix",
                         kicker: "2. STRATEGIC SOURCING",
-                        overview: "Segmenting procurement to optimize resource allocation and mitigate risks.",
-                        highlights: ["Kraljic Matrix", "Strategic Sourcing", "Bottleneck Items", "Multi-sourcing"],
-                        desc: "Not all suppliers are created equal, and treating them uniformly leads to catastrophic inefficiencies. Peter Kraljic’s Purchasing Portfolio Matrix is the definitive tool for modern procurement strategy. It categorizes procured items across two dimensions: Profit Impact and Supply Risk. By mapping items into four quadrants—Leverage, Strategic, Bottleneck, and Non-critical—organizations can tailor their sourcing behaviors appropriately.\n\n'Strategic items' (high impact, high risk) demand deep, long-term partnerships, joint R&D, and executive-level alignment. Conversely, 'Non-critical items' (low impact, low risk) should be heavily automated to minimize transaction costs. The most challenging quadrant is often 'Bottleneck items'—components with low profit impact but severe supply risks, such as highly specific semiconductor chips. For these, the strategy must pivot to volume insurance, maintaining safety stock, and urgently seeking alternative designs or suppliers.\n\nTaiwanese powerhouses like Foxconn and Quanta continually leverage this matrix to manage chip shortages and tech-war disruptions. By moving away from single-source dependencies and adopting multi-regional layouts, they transform procurement from a reactive purchasing function into a proactive risk management weapon.",
-                        wrapUp: "Procurement segmentation via the Kraljic Matrix ensures that organizational resources are focused where they mitigate the highest risks and capture the most value.",
+                        overview: "Segmenting procurement dimensions to optimize resource allocation.",
+                        highlights: ["Kraljic Matrix", "Strategic Sourcing", "Bottleneck Management", "Multi-sourcing"],
+                        desc: "Not all suppliers are created equal, and treating them uniformly leads to catastrophic inefficiencies. Peter Kraljic’s Purchasing Portfolio Matrix is the definitive architecture for modern procurement strategy. It categorizes procured items across two dimensions: Profit Impact and Supply Risk. By mapping items into four quadrants—Leverage, Strategic, Bottleneck, and Non-critical—organizations can tailor their operations appropriately.\n\n'Strategic items' demand deep, long-term partnerships and executive alignment. Conversely, 'Non-critical items' should be automated at the foundational level to minimize transaction costs. The most challenging quadrant is 'Bottleneck items'—components with low profit impact but severe supply risks. For these, the strategy must pivot to volume insurance and safety stock.\n\nLeading tech powerhouses continually leverage this framework to manage chip shortages. By moving away from single-source dependencies, they transform procurement from a reactive purchasing function into a proactive strategic weapon.",
+                        wrapUp: "Procurement segmentation via the Kraljic architecture ensures resources mitigate the highest risks across all dimensions.",
                         cards: [
-                            { term: "Kraljic Matrix", def: "A 2x2 matrix categorizing items by Profit Impact and Supply Risk." },
-                            { term: "Strategic Items", def: "High risk, high impact. Requires long-term supplier partnerships." },
-                            { term: "Bottleneck Items", def: "High risk, low impact. Focus on supply continuity and safety stock." },
-                            { term: "Leverage Items", def: "Low risk, high impact. Exploit purchasing power through bidding." }
+                            { term: "Kraljic Matrix", def: "An architecture categorizing items by Profit Impact and Supply Risk dimensions." },
+                            { term: "Strategic Items", def: "High risk, high impact. Requires foundational supplier partnerships." },
+                            { term: "Bottleneck Items", def: "High risk, low impact. Focus on macro supply continuity." },
+                            { term: "Leverage Items", def: "Low risk, high impact. Exploit strategic purchasing power." }
                         ],
                         quiz: [
-                            { q: "In the Kraljic Matrix, which items have High Supply Risk and High Profit Impact?", opts: ["Bottleneck", "Leverage", "Strategic", "Non-critical"], ans: 2, feedback: "Correct. Strategic items require deep partnerships." },
-                            { q: "What is the best approach for 'Non-critical items'?", opts: ["Process automation", "Joint R&D", "Safety stock", "Aggressive bidding"], ans: 0, feedback: "Correct. The goal is to minimize administrative and transaction costs." },
-                            { q: "How should a company handle a 'Bottleneck' component?", opts: ["Ignore it", "Ensure volume and build safety stock", "Push for lower prices", "Form a joint venture"], ans: 1, feedback: "Correct. Supply continuity is the absolute priority here." },
-                            { q: "The Kraljic Matrix helps transform procurement from operational purchasing to what?", opts: ["Marketing", "Strategic Risk Management", "HR", "Accounting"], ans: 1, feedback: "Correct. It elevates procurement to a strategic level." }
+                            { q: "In Kraljic, which items have High Supply Risk and High Profit Impact?", opts: ["Bottleneck", "Leverage", "Strategic", "Non-critical"], ans: 2, feedback: "Correct. Strategic items require deep partnerships." },
+                            { q: "What is the best approach for 'Non-critical items'?", opts: ["Process automation", "Joint R&D", "Safety stock", "Aggressive bidding"], ans: 0, feedback: "Correct. The goal is to minimize foundational transaction costs." },
+                            { q: "How should a company handle a 'Bottleneck' component?", opts: ["Ignore it", "Ensure volume and safety stock", "Push for lower prices", "Form a joint venture"], ans: 1, feedback: "Correct. Strategic supply continuity is the priority." },
+                            { q: "The Kraljic Matrix elevates procurement to what level?", opts: ["Marketing", "Strategic Risk Management", "HR", "Accounting"], ans: 1, feedback: "Correct. It is a core strategic framework." }
                         ]
                     },
                     {
@@ -183,19 +173,19 @@
                         kicker: "3. RESILIENT PARTNERSHIPS",
                         overview: "Designing resilient contracts and managing supplier dependencies.",
                         highlights: ["Contract Design", "Force Majeure", "SLA", "Resilience"],
-                        desc: "In an era of unpredictable disruptions, the foundation of Supplier Relationship Management (SRM) lies in robust contract design. Contracts are no longer merely pricing agreements; they are the ultimate risk-sharing mechanisms. Key contractual tools include Force Majeure clauses, which must be carefully defined in the context of pandemics and geopolitical conflicts, and Service Level Agreements (SLAs) that dictate performance metrics and recovery times.\n\nWhen Taiwanese SMEs, such as bicycle parts manufacturers, negotiate with international buyers amid tariff threats, they must decide between long-term stability and short-term flexibility. A well-designed contract incorporates flexibility tools like volume-tier pricing and raw material indexation, protecting both buyer and seller from extreme market swings.\n\nBeyond contracts, true resilience requires continuous supplier evaluation and development. Organizations must assess partners not only on cost, but on quality, delivery timeliness, flexibility, and increasingly, ESG compliance. As global brands demand transparent supply chains, Taiwanese suppliers must upgrade their internal practices to remain competitive, treating SRM as a collaborative ecosystem rather than a zero-sum negotiation.",
+                        desc: "In an era of unpredictable disruptions, the foundation of Supplier Relationship Management (SRM) lies in robust contract design. Contracts are no longer merely pricing agreements; they are the ultimate risk-sharing mechanisms. Key contractual tools include Force Majeure clauses, which must be carefully defined in the context of pandemics and geopolitical conflicts, and Service Level Agreements (SLAs) that dictate performance metrics and recovery times.\n\nWhen SMEs negotiate with international buyers amid tariff threats, they must decide between long-term stability and short-term flexibility. A well-designed contract incorporates flexibility tools like volume-tier pricing and raw material indexation, protecting both buyer and seller from extreme market swings.\n\nBeyond contracts, true resilience requires continuous supplier evaluation. Organizations must assess partners not only on cost, but on quality, delivery timeliness, flexibility, and ESG compliance. Treating SRM as a collaborative ecosystem ensures survival.",
                         wrapUp: "Effective SRM and contract design transform adversarial negotiations into resilient, mutually beneficial partnerships equipped to withstand geopolitical shocks.",
                         cards: [
-                            { term: "SLA", def: "Service Level Agreement: A contract detailing the specific level of service expected from a supplier." },
+                            { term: "SLA", def: "Service Level Agreement: A contract detailing the specific performance metrics expected from a supplier." },
                             { term: "Force Majeure", def: "A clause freeing both parties from liability under extraordinary, unforeseeable events." },
-                            { term: "Evaluation Matrix", def: "Assessing vendors systematically on Cost, Quality, Delivery, and Flexibility." },
-                            { term: "Risk-sharing", def: "Contract terms that distribute the financial burden of extreme market volatility." }
+                            { term: "Evaluation Matrix", def: "Assessing vendors systematically on multiple dimensions: Cost, Quality, Delivery, Flexibility." },
+                            { term: "Risk-sharing", def: "Contract terms that distribute the financial burden of extreme macro market volatility." }
                         ],
                         quiz: [
-                            { q: "What is the primary purpose of a Force Majeure clause?", opts: ["Lowering prices", "Freeing parties from liability during extreme events", "Increasing delivery speed", "Ensuring ESG compliance"], ans: 1, feedback: "Correct. It protects against massive, unforeseeable disruptions." },
-                            { q: "Beyond cost, which metric is crucial for evaluating suppliers in today's climate?", opts: ["Office size", "Delivery timeliness & flexibility", "Corporate tenure", "Social media metrics"], ans: 1, feedback: "Correct. Reliability and flexibility are critical for resilience." },
-                            { q: "What does SLA define?", opts: ["Supply Logistics", "Service Level Agreement", "Strategic Leveraging", "Standard Legal Action"], ans: 1, feedback: "Correct. It defines the strict expected performance metrics." },
-                            { q: "Why use raw material indexation in a contract?", opts: ["Protect against price volatility", "Delay shipments", "Reduce labor costs", "Avoid taxation"], ans: 0, feedback: "Correct. It links the contract price to market commodity indices equitably." }
+                            { q: "What is the primary purpose of a Force Majeure clause?", opts: ["Lowering prices", "Freeing parties from liability during extreme events", "Increasing delivery speed", "Ensuring ESG compliance"], ans: 1, feedback: "Correct. It protects against massive disruptions." },
+                            { q: "Beyond cost, which metric is crucial for evaluating suppliers?", opts: ["Office size", "Delivery timeliness & flexibility", "Corporate tenure", "Social media metrics"], ans: 1, feedback: "Correct. Reliability is critical for foundational resilience." },
+                            { q: "What does SLA define?", opts: ["Supply Logistics", "Service Level Agreement", "Strategic Leveraging", "Standard Legal Action"], ans: 1, feedback: "Correct. It defines strict expected performance metrics." },
+                            { q: "Why use raw material indexation in a contract?", opts: ["Protect against price volatility", "Delay shipments", "Reduce labor costs", "Avoid taxation"], ans: 0, feedback: "Correct. It links the contract price to macro market indices." }
                         ]
                     },
                     {
@@ -203,19 +193,19 @@
                         kicker: "4. OPERATIONAL EXCELLENCE",
                         overview: "Optimizing operations through TPS, JIT, and ERP systems.",
                         highlights: ["JIT & TPS", "WIP Control", "TCE Theory", "ERP Integration"],
-                        desc: "Modern production management traces its roots from Ford's mass assembly lines to the refined elegance of the Toyota Production System (TPS). While Ford revolutionized economies of scale, TPS introduced Lean Production, emphasizing the elimination of waste (Muda) and the implementation of Just-In-Time (JIT) delivery. By strictly controlling Work-In-Process (WIP) inventory, companies can drastically reduce holding costs and expose hidden production bottlenecks.\n\nHowever, implementing JIT in a volatile geopolitical environment is incredibly risky. This is where Transaction Cost Economics (TCE) and Enterprise Resource Planning (ERP) systems become vital. TCE dictates that firms must balance search, negotiation, and monitoring costs against the benefits of outsourcing. To manage this, ERP and Management Information Systems (MIS) act as the central nervous system of the supply chain.\n\nERP integration allows for real-time visibility across Procurement, Inventory Management, and Sales. It automates order processing, tracks inventory movements dynamically, and aligns production schedules with actual market demand, ensuring that the 'Lean' approach does not become 'Fragile' when facing supply shocks.",
-                        wrapUp: "Lean production maximizes efficiency, but it must be paired with robust ERP visibility to maintain supply chain resilience.",
+                        desc: "Modern production management traces its roots from mass assembly lines to the refined elegance of the Toyota Production System (TPS). While traditional methods revolutionized economies of scale, TPS introduced Lean Production, emphasizing the elimination of waste and the implementation of Just-In-Time (JIT) delivery. By strictly controlling Work-In-Process (WIP) inventory, companies can drastically reduce holding costs and expose hidden bottlenecks.\n\nHowever, implementing JIT in a volatile geopolitical environment is risky. This is where Transaction Cost Economics (TCE) and Enterprise Resource Planning (ERP) systems become vital. TCE dictates that firms must balance search, negotiation, and monitoring costs against the benefits of outsourcing.\n\nERP integration allows for real-time visibility across Procurement, Inventory, and Sales. It automates order processing and aligns production schedules with actual market demand, ensuring that the 'Lean' approach does not become 'Fragile'.",
+                        wrapUp: "Lean production maximizes efficiency, but it must be paired with robust ERP visibility to maintain strategic resilience.",
                         cards: [
-                            { term: "JIT", def: "Just-In-Time: Receiving goods only as they are needed in the production process." },
-                            { term: "WIP Control", def: "Work In Process: Managing partially finished goods; a key metric of lean manufacturing." },
-                            { term: "ERP", def: "Enterprise Resource Planning: Software integrating and automating core business processes." },
+                            { term: "JIT", def: "Just-In-Time: Receiving goods only as they are needed to minimize inventory costs." },
+                            { term: "WIP Control", def: "Work In Process: Managing partially finished goods; a key dimension of lean manufacturing." },
+                            { term: "ERP", def: "Enterprise Resource Planning: Software integrating and automating foundational business processes." },
                             { term: "Transaction Cost", def: "Costs incurred in market exchanges, including search, negotiation, and monitoring." }
                         ],
                         quiz: [
-                            { q: "What is the primary goal of Just-In-Time (JIT) production?", opts: ["Maximize warehouse footprint", "Reduce inventory and eliminate waste", "Increase lead times intentionally", "Expand workforce"], ans: 1, feedback: "Correct. JIT minimizes holding costs by delivering exactly when needed." },
-                            { q: "Which system acts as the central information hub for inventory and sales?", opts: ["TPS", "JIT", "ERP", "TCE"], ans: 2, feedback: "Correct. ERP integrates all departmental data in real-time." },
-                            { q: "In Transaction Cost Economics (TCE), what is a key cost factor?", opts: ["Search and negotiation costs", "Electricity bills", "Marketing budget", "R&D costs"], ans: 0, feedback: "Correct. TCE focuses on the friction of executing business in the market." },
-                            { q: "What does controlling WIP achieve?", opts: ["Increases storage", "Exposes bottlenecks and reduces waste", "Creates surplus", "Slows down workers"], ans: 1, feedback: "Correct. Limiting Work-In-Process is crucial for lean, continuous flow." }
+                            { q: "What is the primary goal of Just-In-Time (JIT)?", opts: ["Maximize warehouse footprint", "Reduce inventory and eliminate waste", "Increase lead times intentionally", "Expand workforce"], ans: 1, feedback: "Correct. JIT minimizes holding costs." },
+                            { q: "Which system acts as the central hub for inventory data?", opts: ["TPS", "JIT", "ERP", "TCE"], ans: 2, feedback: "Correct. ERP integrates all foundational departmental data." },
+                            { q: "In TCE, what is a key cost factor?", opts: ["Search and negotiation costs", "Electricity bills", "Marketing budget", "R&D costs"], ans: 0, feedback: "Correct. TCE focuses on the friction of market transactions." },
+                            { q: "What does controlling WIP achieve?", opts: ["Increases storage", "Exposes bottlenecks and reduces waste", "Creates surplus", "Slows down workers"], ans: 1, feedback: "Correct. It is crucial for lean continuous flow." }
                         ]
                     },
                     {
@@ -223,19 +213,19 @@
                         kicker: "5. DIGITAL TRANSFORMATION",
                         overview: "Leveraging Artificial Intelligence to predict demand and optimize logistics.",
                         highlights: ["Predictive AI", "Dynamic EOQ", "Route Optimization", "Risk Scoring"],
-                        desc: "The integration of Artificial Intelligence (AI) is revolutionizing how SMEs manage their supply chains. Traditional demand forecasting relied heavily on static historical averages, which fail completely during market disruptions. Today, AI models—from machine learning algorithms to tools like ChatGPT and Google Sheets AI—can analyze vast datasets, including seasonality, market trends, and even geopolitical news, to provide highly accurate predictive analytics.\n\nOne of the most immediate applications is the dynamic calculation of the Economic Order Quantity (EOQ). While the classic EOQ formula minimizes the total costs of inventory holding and ordering, AI can continuously adjust these variables based on real-time supplier pricing and warehouse capacities. Furthermore, AI is transforming logistics optimization.\n\nBy utilizing algorithms to solve the Traveling Salesperson Problem (TSP) or Vehicle Routing Problem (VRP) through Google Maps APIs, SMEs can significantly reduce transportation costs and carbon footprints. Finally, AI assists in vendor management by aggregating data to create dynamic supplier risk scores, allowing procurement teams to act preemptively rather than reactively.",
-                        wrapUp: "AI does not replace human judgment; it supercharges it, turning raw supply chain data into predictive, actionable intelligence.",
+                        desc: "The integration of Artificial Intelligence (AI) is revolutionizing how enterprises manage their supply chains. Traditional demand forecasting relied heavily on static historical averages, which fail completely during macro market disruptions. Today, AI models can analyze vast datasets, including seasonality and geopolitical news, to provide highly accurate predictive analytics.\n\nOne of the most immediate applications is the dynamic calculation of the Economic Order Quantity (EOQ). While the classic EOQ formula minimizes the total costs of inventory holding and ordering, AI can continuously adjust these variables based on real-time supplier pricing and warehouse capacities.\n\nBy utilizing algorithms to solve the Vehicle Routing Problem (VRP), SMEs can significantly reduce transportation costs. Finally, AI assists in vendor management by aggregating data to create dynamic supplier risk scores, allowing procurement teams to act preemptively.",
+                        wrapUp: "AI does not replace executive judgment; it supercharges it, turning raw data into predictive, strategic intelligence.",
                         cards: [
-                            { term: "Dynamic EOQ", def: "Economic Order Quantity continuously adjusted by AI based on real-time variables." },
-                            { term: "TSP / VRP", def: "Algorithmic models utilized to find the absolute most efficient delivery routes." },
+                            { term: "Dynamic EOQ", def: "Economic Order Quantity continuously adjusted by AI based on real-time macro variables." },
+                            { term: "VRP", def: "Vehicle Routing Problem: Algorithmic models used to find the most efficient delivery routes." },
                             { term: "Predictive Analytics", def: "Using historical data and machine learning to forecast future market demand." },
-                            { term: "Risk Scoring", def: "An AI-generated, dynamic metric evaluating the stability and reliability of a vendor." }
+                            { term: "Risk Scoring", def: "An AI-generated metric evaluating the stability and reliability of a vendor." }
                         ],
                         quiz: [
-                            { q: "What is the primary function of the Economic Order Quantity (EOQ)?", opts: ["Maximize total inventory volume", "Minimize combined holding and ordering costs", "Identify the cheapest supplier", "Calculate delivery routes"], ans: 1, feedback: "Correct. EOQ finds the perfect mathematical balance for order sizes." },
-                            { q: "Which algorithmic application is used for optimizing logistics and delivery routes?", opts: ["NLP", "VRP (Vehicle Routing Problem)", "Dynamic EOQ", "PESTEL"], ans: 1, feedback: "Correct. VRP algorithms computationally minimize travel time and fuel." },
-                            { q: "How does AI fundamentally improve demand forecasting?", opts: ["By generating random guesses", "By analyzing complex historical and real-time datasets", "By surveying customers directly", "By halting production lines"], ans: 1, feedback: "Correct. AI identifies hidden, non-linear patterns in massive data sets." },
-                            { q: "True or False: AI in SCM renders human executive judgment obsolete.", opts: ["True", "False"], ans: 1, feedback: "Correct. AI is a powerful diagnostic tool; executive expertise remains vital for strategic action." }
+                            { q: "What is the primary function of EOQ?", opts: ["Maximize total volume", "Minimize combined holding and ordering costs", "Identify the cheapest supplier", "Calculate delivery routes"], ans: 1, feedback: "Correct. EOQ finds the optimal mathematical balance." },
+                            { q: "Which algorithm optimizes logistics routes?", opts: ["NLP", "VRP", "Dynamic EOQ", "PESTEL"], ans: 1, feedback: "Correct. VRP minimizes travel time and fuel." },
+                            { q: "How does AI fundamentally improve forecasting?", opts: ["Random guesses", "Analyzing complex historical and real-time datasets", "Customer surveys", "Halting production"], ans: 1, feedback: "Correct. AI identifies hidden patterns in massive data." },
+                            { q: "True or False: AI renders executive judgment obsolete.", opts: ["True", "False"], ans: 1, feedback: "Correct. Executive strategic expertise remains vital." }
                         ]
                     },
                     {
@@ -243,168 +233,540 @@
                         kicker: "6. OMNI-CHANNEL INTEGRATION",
                         overview: "Designing omni-channel strategies and integrating physical/digital retail.",
                         highlights: ["Omni-channel", "O2O Integration", "BOPIS", "Smart Promotion"],
-                        desc: "The retail landscape has irrevocably shifted from isolated sales channels to integrated omni-channel ecosystems. For SMEs, deciding whether to utilize direct-to-consumer (D2C), distributors, or wholesale depends heavily on product attributes, target demographics, and cost constraints. However, the true competitive differentiator today is O2O (Online-to-Offline) integration.\n\nA prime example of O2O is the BOPIS model (Buy Online, Pick Up In Store). This strategy not only satisfies consumer desire for instant gratification while saving shipping costs, but it also drives critical foot traffic into physical stores, creating up-selling opportunities. AI plays a pivotal role here by analyzing Google Analytics and customer purchase histories to offer personalized product recommendations during the pickup process.\n\nFurthermore, AI optimizes inventory turnover through smart promotional strategies. Rather than relying solely on margin-destroying discounts, AI can recommend optimal bundling (joint promotions) or targeted giveaways that clear slow-moving stock without devaluing the brand. Mastering these omni-channel strategies ensures a seamless, frictionless customer journey.",
-                        wrapUp: "Successful retail management seamlessly blends digital convenience with physical experience, driven by AI-powered personalization.",
+                        desc: "The retail landscape has irrevocably shifted from isolated sales channels to integrated omni-channel ecosystems. For businesses, deciding whether to utilize direct-to-consumer (D2C), distributors, or wholesale depends heavily on product attributes and cost constraints. However, the true competitive differentiator today is O2O (Online-to-Offline) integration.\n\nA prime example of O2O is the BOPIS model (Buy Online, Pick Up In Store). This strategy satisfies consumer desire for instant gratification while saving shipping costs, and it drives critical foot traffic into physical stores, creating up-selling opportunities. AI plays a pivotal role here by analyzing customer purchase histories to offer personalized recommendations during pickup.\n\nFurthermore, AI optimizes inventory turnover through smart promotional strategies. Rather than relying solely on margin-destroying discounts, AI can recommend optimal bundling that clears slow-moving stock without devaluing the brand.",
+                        wrapUp: "Successful retail management seamlessly blends digital convenience with physical experience across all dimensions.",
                         cards: [
                             { term: "O2O Model", def: "Online-to-Offline: Integrating digital commerce seamlessly with physical retail infrastructure." },
                             { term: "BOPIS", def: "Buy Online, Pick Up In Store: A core operational strategy driving foot traffic." },
                             { term: "Omni-channel", def: "A unified, frictionless customer experience maintained consistently across all sales platforms." },
-                            { term: "Joint Promotion", def: "Bundling products strategically to accelerate inventory turnover without slashing margins." }
+                            { term: "Bundling", def: "Joint promotion combining products strategically to accelerate inventory turnover." }
                         ],
                         quiz: [
-                            { q: "What does the acronym BOPIS represent in modern retail?", opts: ["Buy One, Pay In Store", "Buy Online, Pick Up In Store", "Best Online Price In Store", "Bring Own Product In Store"], ans: 1, feedback: "Correct. It is a cornerstone strategy of O2O retail integration." },
-                            { q: "What is a major strategic benefit of BOPIS for the retailer?", opts: ["Increases shipping costs", "Forces customer wait times", "Drives physical foot traffic for potential up-selling", "Reduces overall website traffic"], ans: 2, feedback: "Correct. Customers entering the physical store present immediate cross-selling opportunities." },
-                            { q: "To protect brand equity, what is a preferred alternative to deep discounting to clear inventory?", opts: ["Hiding the product", "Joint promotions / Bundling", "Raising the retail price", "Ceasing all advertising"], ans: 1, feedback: "Correct. Bundling adds perceived value without directly slashing the price point." },
-                            { q: "What is the defining characteristic of an Omni-channel strategy?", opts: ["Digital-only sales focus", "Siloed, channel-specific experiences", "A unified, consistent experience across all touchpoints", "Elimination of physical storefronts"], ans: 2, feedback: "Correct. The objective is a completely seamless journey for the consumer." }
+                            { q: "What does BOPIS represent?", opts: ["Buy One, Pay In Store", "Buy Online, Pick Up In Store", "Best Online Price In Store", "Bring Own Product In Store"], ans: 1, feedback: "Correct. It is a cornerstone O2O strategy." },
+                            { q: "What is a major strategic benefit of BOPIS?", opts: ["Increases shipping costs", "Forces wait times", "Drives physical foot traffic for up-selling", "Reduces website traffic"], ans: 2, feedback: "Correct. Customers in-store present cross-selling opportunities." },
+                            { q: "To protect brand equity, what is an alternative to deep discounting?", opts: ["Hiding the product", "Bundling (Joint promotions)", "Raising the price", "Ceasing advertising"], ans: 1, feedback: "Correct. Bundling adds perceived value without slashing prices." },
+                            { q: "What defines an Omni-channel strategy?", opts: ["Digital-only focus", "Siloed experiences", "A unified, consistent experience across all touchpoints", "No physical stores"], ans: 2, feedback: "Correct. The objective is a seamless consumer journey." }
                         ]
                     }
                 ],
-                lab: { title: "Strategy Lab", kicker: "7. INTERACTIVE MODULES", items: ["Kraljic Classifier", "Dynamic EOQ Calculator", "PESTEL Risk Map", "Resilience Scorecard"] },
-                resources: { title: "Insights & Resources", kicker: "8. EXTERNAL LITERATURE", items: ["Financial Times: Ukraine crisis energy impact", "Reuters: China-ASEAN trade dynamics", "Bloomberg: Supply Chain Resilience Reports", "Focus Taiwan: Tariff impacts on SMEs"] },
-                analytics: { title: "Analytics Dashboard", kicker: "9. PERFORMANCE METRICS", group: "Group / Cohort", studentId: "Identification No.", name: "Full Name", export: "Export Data (CSV)", interactions: "Interactions", time: "Session (Sec)", clear: "Purge session data upon export" },
-                footer: { top: "Back to Top", architect: "Architect: Prof. Shihmin Lo", copy: "2025 SCM Global Strategy. All rights reserved." },
-                btn: { next: "Next Module", retry: "Reset", prevPage: "Previous Section", nextPage: "Next Section", check: "Knowledge Verification" }
+                lab: { title: "Strategy Lab", kicker: "7. INTERACTIVE MODULES", desc: "Apply strategic frameworks to real-world operational scenarios." },
+                resources: { title: "External Resources", kicker: "8. LITERATURE & INSIGHTS", items: ["Financial Times: Macro-geopolitical energy impact", "Reuters: ASEAN strategic trade dimensions", "Bloomberg: Supply Chain Foundation Reports", "Focus Taiwan: Tariff frameworks on SMEs"] },
+                analytics: { title: "Analytics Dashboard", kicker: "9. PERFORMANCE METRICS", group: "Group / Cohort", studentId: "Student ID No.", name: "Full Name", export: "Export CSV Report", interactions: "Interactions", time: "Session (Sec)", clear: "Clear data post-export", cards: "Cards Reviewed", quiz: "Quiz Accuracy" },
+                footer: { top: "Top", architect: "Architect: Prof. Shihmin Lo", copy: "2026 Global SCM Strategy. All rights reserved." },
+                btn: { next: "Next Theme", retry: "Reset", prevPage: "Previous Theme", check: "Module Knowledge Check", read: "Read", answered: "Answered", nextCards: "Next Cards", nextQuiz: "Next Quizzes", flashcards: "Deep Dive Cards" }
             },
             ZH: {
-                brand: "全球供應鏈策略",
-                nav: ["0. 課程概要", "1. 地緣政治與 PESTEL", "2. Kraljic 採購矩陣", "3. 供應商合約與 SRM", "4. 精實生產與 SCM", "5. AI 需求預測", "6. 零售通路與 O2O", "7. 策略實驗室", "8. 洞察與資源", "9. 歷程分析"],
+                brand: "SCM",
+                brandFull: "Global SCM Strategy",
+                nav: ["0. 執行概要", "1. 地緣政治與 PESTEL", "2. Kraljic 採購矩陣", "3. 合約與供應商關係", "4. 精實生產與 SCM", "5. AI 需求預測", "6. 零售通路與 O2O", "7. 策略實驗室", "8. 外部學習資源", "9. 學習歷程分析"],
                 summary: {
                     title: "課程執行概要",
                     kicker: "0. PROGRAM SUMMARY",
-                    desc: "這門 6 小時的高階主管培訓課程 (EDP) 旨在橋接宏觀地緣政治變動與高度實務的供應鏈及零售通路策略。在充滿極端波動的時代——例如俄烏衝突、美中貿易緊張以及不可預測的關稅政策——企業不能再單純依賴「成本中心」的採購模型。\n\n本課程結構嚴謹，旨在引導領導者轉向「韌性中心」的營運模式。我們將經典策略框架（如 PESTEL 分析與 Kraljic 採購組合矩陣）與現代數位轉型需求相結合。學員將深入探討供應商關係管理 (SRM)，掌握合約設計的藝術，透過不可抗力條款與 SLA 服務水準協議來降低風險。此外，課程還將探討精實生產、JIT 方法論，以及 AI 在需求預測與 O2O（線上線下整合）零售通路中的尖端應用。專為台灣中小企業高階主管設計，此學習旅程將為您提供具體可行的工具包，以保護利潤、提升透明度，並在動盪的全球生態系中維持競爭優勢。",
+                    desc: "這門高階主管培訓課程 (EDP) 旨在橋接總體地緣政治變動與高度實務的供應鏈及零售通路策略。在充滿極端波動的時代——例如俄烏衝突、美中貿易緊張以及不可預測的關稅政策——企業不能再單純依賴成本導向的採購模型。全球貿易的基礎架構已經發生了根本性的改變。\n\n本課程結構嚴謹，旨在引導領導者轉向以韌性為基礎的營運模式。我們將經典策略架構（如 PESTEL 分析構面與 Kraljic 採購組合矩陣）與現代數位轉型需求相結合。學員將深入探討供應商關係管理 (SRM)，掌握合約設計的藝術，透過不可抗力條款與 SLA 協議來降低風險。\n\n此外，課程還將探討精實生產、JIT 方法論，以及 AI 在需求預測與 O2O（線上線下整合）零售通路中的尖端應用。專為企業高階主管設計，此學習旅程將為您提供具體可行的工具包，以保護利潤、提升透明度，並在動盪的全球生態系多個構面中維持絕對的競爭優勢。",
                 },
                 themes: [
                     {
-                        title: "全球地緣政治衝擊與 PESTEL 架構",
+                        title: "總體地緣政治衝擊與 PESTEL",
                         kicker: "1. MACRO-ENVIRONMENTAL THREATS",
-                        overview: "解構總體環境對全球供應鏈的威脅與衝擊。",
-                        highlights: ["PESTEL 分析", "俄烏戰爭影響", "美中對抗", "風險地圖"],
-                        desc: "當代供應鏈與全球地緣政治深度交織。政治首都的決策會瞬間波及全球製造中心。最典型的例子是俄烏戰爭，它從根本上破壞了歐洲的能源網與原物料供應，迫使製造商倉促重新設計其採購地理佈局。為應對此複雜性，採購主管必須採用 PESTEL 架構（分析政治、經濟、社會、科技、環境與法律因素），將其作為核心診斷機制，而非紙上談兵的理論。\n\n同時，美中之間的戰略競爭引入了巨大的摩擦力。從半導體出口管制到南海爭端及潛在的美國關稅，這些議題催生了「中國加一」策略。台灣的中小企業（特別是電子與精密機械領域）正積極繪製地緣政治風險地圖，以在越南與印度等東協國家尋找替代製造基地。\n\n最終，主動的風險管理需要從靜態採購轉向動態、情資導向的供應鏈編排。辨識地理瓶頸並部署多來源採購策略已不再是選項，而是企業生存的必要戰術。",
-                        wrapUp: "地緣政治風險是新的基準線。PESTEL 提供了結構化的視角，將全球不確定性轉化為策略遠見。",
+                        overview: "解構總體環境對全球供應鏈網絡的威脅與衝擊。",
+                        highlights: ["PESTEL 架構", "俄烏戰爭影響", "美中對抗", "風險地圖"],
+                        desc: "當代供應鏈與全球地緣政治深度交織。政治首都的決策會瞬間波及全球製造基礎。最典型的例子是俄烏戰爭，它從根本上破壞了歐洲的能源網與原物料供應，迫使製造商倉促重新設計其採購地理佈局。為應對此複雜性，採購主管必須採用 PESTEL 架構——分析政治、經濟、社會、科技、環境與法律等多個構面——將其作為核心診斷機制，而非紙上談兵的理論。\n\n同時，美中之間的策略競爭在貿易的基礎層面引入了巨大的摩擦力。從半導體出口管制到南海爭端及潛在的美國關稅，這些議題催生了「中國加一」的總體策略。企業正積極繪製地緣政治風險地圖，以在東協國家尋找替代製造基地。\n\n最終，主動的風險管理需要從靜態採購轉向動態、情資導向的供應鏈編排。辨識地理瓶頸並部署多來源採購策略已不再是選項，而是企業在多個構面上維持韌性生存的必要戰術。",
+                        wrapUp: "地緣政治風險是新的基準線。PESTEL 提供了結構化的架構，將全球不確定性轉化為策略遠見。",
                         cards: [
-                            { term: "PESTEL 分析", def: "分析宏觀環境因素的策略工具：政治、經濟、社會、科技、環境、法律。" },
-                            { term: "風險地圖", def: "將全球供應網絡視覺化，以辨識地理脆弱性與戰略瓶頸點。" },
-                            { term: "中國加一", def: "企業避免僅投資單一區域，透過多元化佈局其他國家的商業防禦策略。" },
-                            { term: "友岸外包", def: "在盟國或政治友好國家內採購原物料與進行製造，以確保供應安全。" }
+                            { term: "PESTEL 架構", def: "分析總體環境的策略架構，包含六大構面：政治、經濟、社會、科技、環境、法律。" },
+                            { term: "風險地圖", def: "將全球供應網絡視覺化，以辨識基礎地理的脆弱性與瓶頸點。" },
+                            { term: "中國加一", def: "企業避免僅投資單一區域的總體商業防禦策略。" },
+                            { term: "友岸外包", def: "在盟國或政治友好國家內採購原物料，以確保策略安全。" }
                         ],
                         quiz: [
-                            { q: "近期哪個事件嚴重破壞了歐洲的能源與原物料供應鏈？", opts: ["蘇伊士運河堵塞", "俄烏戰爭", "美國大選", "英國脫歐"], ans: 1, feedback: "正確。該衝突導致歐洲製造業面臨巨大的能源危機。" },
-                            { q: "PESTEL 中的第一個 'E' 代表什麼？", opts: ["能源 (Energy)", "工程 (Engineering)", "經濟 (Economic)", "效率 (Efficiency)"], ans: 2, feedback: "正確。它代表 Economic (經濟)，第二個 E 則是 Environmental (環境)。" },
-                            { q: "「中國加一」策略通常會將目標轉向哪個地區？", opts: ["東歐", "東協 (ASEAN)", "南美洲", "中東"], ans: 1, feedback: "正確。如越南等東協國家是首選的替代基地。" },
-                            { q: "繪製地緣政治風險地圖的主要戰略目標是什麼？", opts: ["減少稅收", "視覺化供應鏈瓶頸點", "增加行銷預算", "招募跨國人才"], ans: 1, feedback: "正確。這有助於視覺化並預防供應鏈的脆弱環節。" }
+                            { q: "近期哪個事件嚴重破壞了歐洲的總體能源供應？", opts: ["蘇伊士運河堵塞", "俄烏戰爭", "美國大選", "英國脫歐"], ans: 1, feedback: "正確。該衝突導致了巨大的能源危機。" },
+                            { q: "PESTEL 中的第一個 'E' 代表哪個構面？", opts: ["能源", "工程", "經濟", "效率"], ans: 2, feedback: "正確。它代表經濟 (Economic)，另一個是環境。" },
+                            { q: "「中國加一」策略通常會將目標轉向哪個地區？", opts: ["東歐", "東協 (ASEAN)", "南美洲", "中東"], ans: 1, feedback: "正確。東協國家是首選的替代基礎。" },
+                            { q: "繪製地緣政治風險地圖的主要策略目標為何？", opts: ["減少稅收", "視覺化策略瓶頸", "增加行銷預算", "招募跨國人才"], ans: 1, feedback: "正確。這有助於視覺化並預防供應鏈的脆弱環節。" }
                         ]
                     },
                     {
                         title: "採購策略與 Kraljic 矩陣",
                         kicker: "2. STRATEGIC SOURCING",
-                        overview: "透過採購細分來優化資源配置並降低風險。",
+                        overview: "透過採購構面細分來優化資源配置並降低風險。",
                         highlights: ["Kraljic 矩陣", "策略性採購", "瓶頸管理", "多來源佈局"],
-                        desc: "並非所有供應商都處於同等地位，統一對待將導致災難性的效率低落。Peter Kraljic 的採購組合矩陣是現代採購策略的決定性工具。它根據「利潤影響」與「供應風險」兩個維度將採購項目分類。透過將項目映射到四個象限——槓桿、策略、瓶頸與非關鍵——組織可以適當地調整其採購行為。\n\n「策略性項目」（高影響、高風險）需要深度、長期的夥伴關係，共同研發以及高層級的對接。相反，「非關鍵項目」（低影響、低風險）應該高度自動化，以大幅降低交易與行政成本。最具挑戰性的是「瓶頸項目」——利潤影響低但供應風險極高的零組件，例如特定規格的晶片。針對這類項目，策略必須轉向「產量保障」、維持安全庫存，並緊急尋找替代設計或供應商。\n\n台灣的科技巨頭（如鴻海、廣達）持續利用此矩陣來應對晶片短缺與科技戰的干擾。透過擺脫單一來源依賴並採用多區域佈局，他們將採購從被動的買賣功能轉變為主動的風險管理武器。",
-                        wrapUp: "透過 Kraljic 矩陣進行採購細分，可確保企業資源集中於能緩解最高風險與創造最大價值的環節。",
+                        desc: "並非所有供應商都處於同等地位，統一對待將導致災難性的效率低落。Peter Kraljic 的採購組合矩陣是現代採購策略的決定性架構。它根據「利潤影響」與「供應風險」兩個構面將採購項目分類。透過將項目映射到四個象限——槓桿、策略、瓶頸與非關鍵——組織可以適當地調整其營運行為。\n\n「策略性項目」需要深度、長期的夥伴關係以及高層的對接。相反，「非關鍵項目」應該在基礎運作上高度自動化，以大幅降低交易成本。最具挑戰性的構面是「瓶頸項目」——利潤影響低但供應風險極高的零組件。針對這類項目，策略必須轉向產量保障與維持安全庫存。\n\n領先的科技巨頭持續利用此架構來應對晶片短缺。透過擺脫單一來源依賴，他們將採購從被動的買賣功能轉變為主動的策略性武器。",
+                        wrapUp: "透過 Kraljic 架構進行採購細分，可確保企業資源集中於能緩解最高風險的構面上。",
                         cards: [
-                            { term: "Kraljic 矩陣", def: "一個以「利潤影響」和「供應風險」為維度，將採購項目分類的 2x2 矩陣。" },
-                            { term: "策略性項目", def: "高風險、高影響。需要發展長期的戰略供應商夥伴關係。" },
-                            { term: "瓶頸項目", def: "高風險、低影響。重點在於確保供應連續性與建立安全庫存。" },
-                            { term: "槓桿項目", def: "低風險、高影響。透過競標充分利用企業的採購議價能力以壓低成本。" }
+                            { term: "Kraljic 矩陣", def: "以利潤影響和供應風險為構面，將採購項目分類的經典架構。" },
+                            { term: "策略性項目", def: "高風險、高影響。需要發展長期的基礎夥伴關係。" },
+                            { term: "瓶頸項目", def: "高風險、低影響。重點在於確保總體供應的連續性。" },
+                            { term: "槓桿項目", def: "低風險、高影響。透過策略性競標充分利用採購能力。" }
                         ],
                         quiz: [
-                            { q: "在 Kraljic 矩陣中，哪些項目具有高供應風險與高利潤影響？", opts: ["瓶頸項目", "槓桿項目", "策略性項目", "非關鍵項目"], ans: 2, feedback: "正確。策略性項目需要高層級的深度夥伴關係。" },
-                            { q: "對於「非關鍵項目」，最佳的處理方式是什麼？", opts: ["流程自動化", "共同研發", "建立大量安全庫存", "積極競標"], ans: 0, feedback: "正確。其核心目標是將行政與交易成本降至最低。" },
-                            { q: "企業應如何處理「瓶頸」零組件？", opts: ["忽略風險", "確保產量並建立安全庫存", "施壓要求降價", "成立合資企業"], ans: 1, feedback: "正確。供應的連續性在此處是絕對的優先考量。" },
-                            { q: "Kraljic 矩陣幫助將採購從作業層級提升至何種層級？", opts: ["行銷管理", "策略風險管理", "人力資源", "財務會計"], ans: 1, feedback: "正確。它將採購功能正式提升為企業的策略層級。" }
+                            { q: "在 Kraljic 矩陣中，哪些項目具有高供應風險與高利潤影響？", opts: ["瓶頸項目", "槓桿項目", "策略性項目", "非關鍵項目"], ans: 2, feedback: "正確。策略性項目需要深度的夥伴關係。" },
+                            { q: "對於「非關鍵項目」，最佳的基礎處理方式是什麼？", opts: ["流程自動化", "共同研發", "建立安全庫存", "積極競標"], ans: 0, feedback: "正確。核心目標是將基礎交易成本降至最低。" },
+                            { q: "企業策略上應如何處理「瓶頸」零組件？", opts: ["忽略風險", "確保產量並建立安全庫存", "施壓要求降價", "成立合資企業"], ans: 1, feedback: "正確。供應的連續性在此處是絕對的優先考量。" },
+                            { q: "Kraljic 矩陣幫助將採購提升至何種層次？", opts: ["行銷管理", "策略風險管理", "人力資源", "財務會計"], ans: 1, feedback: "正確。它是一個核心的策略架構。" }
                         ]
                     },
                     {
                         title: "供應商關係管理與合約設計",
                         kicker: "3. RESILIENT PARTNERSHIPS",
-                        overview: "設計具備韌性的合約並管理供應商依存度。",
+                        overview: "設計具備韌性的合約並管理供應商的基礎依存度。",
                         highlights: ["合約設計", "不可抗力條款", "SLA 協議", "供應鏈韌性"],
-                        desc: "在充滿不可預測干擾的時代，供應商關係管理 (SRM) 的基石在於穩健的合約設計。合約已不再只是定價協議，而是終極的「風險分攤機制」。關鍵的合約工具包括「不可抗力條款」(Force Majeure)——在疫情與地緣政治衝突的背景下必須謹慎定義，以及「服務水準協議」(SLA)——規定具體的績效指標與復原時間。\n\n當台灣中小企業（如自行車零件製造商）在關稅威脅下面對國際買家談判時，必須在長期穩定性與短期靈活性之間做出抉擇。設計良好的合約會納入靈活性工具，例如數量階梯定價與原物料價格指數化，保護買賣雙方免受極端市場波動的衝擊。\n\n超越合約層面，真正的韌性需要持續的供應商評估與發展。組織評估夥伴的標準不能僅限於成本，還必須包含品質、交貨準時性、靈活性，以及日益重要的 ESG 合規性。隨著全球品牌要求透明的供應鏈，台灣供應商必須升級內部實務以保持競爭力，將 SRM 視為協作的生態系，而非零和博弈的談判。",
-                        wrapUp: "有效的 SRM 與合約設計，能將對立的談判轉化為具備韌性、互利共贏且能抵禦衝擊的夥伴關係。",
+                        desc: "在充滿不可預測干擾的時代，供應商關係管理 (SRM) 的基石在於穩健的合約設計。合約已不再只是定價協議，而是終極的風險分攤機制。關鍵的合約工具包括不可抗力條款——在地緣政治衝突的背景下必須謹慎定義，以及服務水準協議 (SLA)——規定具體的績效指標與復原時間。\n\n當企業在關稅威脅下面對國際買家談判時，必須在長期穩定性與短期靈活性之間做出抉擇。設計良好的合約會納入靈活性工具，例如數量階梯定價與原物料價格指數化，保護買賣雙方免受極端總體市場波動的衝擊。\n\n超越合約層面，真正的韌性需要持續的供應商評估與發展。組織評估夥伴的標準不能僅限於成本，還必須包含多個構面：品質、交貨靈活性，以及 ESG 合規性。將 SRM 視為協作的生態系，是確保營運的基礎。",
+                        wrapUp: "有效的 SRM 與合約設計，能將對立的談判轉化為具備韌性、互利共贏的策略夥伴關係。",
                         cards: [
-                            { term: "SLA (協議)", def: "服務水準協議：詳細規定供應商必須達成的特定服務與績效標準之合約。" },
-                            { term: "不可抗力條款", def: "在發生異常重大、不可預見事件時，免除雙方合約責任的條款。" },
-                            { term: "供應商評估", def: "依據成本、品質、交貨與靈活性等多維度指標來系統化考核供應商。" },
-                            { term: "風險分攤條款", def: "在買賣雙方之間公平分配市場劇烈波動所帶來之財務負擔的條款。" }
+                            { term: "SLA (協議)", def: "服務水準協議：詳細規定供應商必須達成的特定服務與績效指標之合約。" },
+                            { term: "不可抗力條款", def: "在發生異常重大事件時，免除雙方合約責任的保護條款。" },
+                            { term: "多構面評估", def: "依據成本、品質、交貨與靈活性等多個構面來考核供應商。" },
+                            { term: "風險分攤", def: "在買賣雙方之間公平分配總體市場劇烈波動所帶來之財務負擔。" }
                         ],
                         quiz: [
-                            { q: "不可抗力條款的主要目的是什麼？", opts: ["降低採購價格", "在極端事件期間免除雙方責任", "提高交貨速度", "確保 ESG 絕對合規"], ans: 1, feedback: "正確。它保護雙方免受天災或重大不可控破壞的影響。" },
-                            { q: "除了成本之外，現今評估供應商的另一個關鍵指標是什麼？", opts: ["企業總部規模", "交貨準時性與靈活性", "執行長的年齡", "社群媒體粉絲數"], ans: 1, feedback: "正確。營運的可靠性與靈活性是供應鏈韌性的關鍵。" },
+                            { q: "不可抗力條款的主要目的是什麼？", opts: ["降低採購價格", "在極端事件期間免除雙方責任", "提高交貨速度", "確保 ESG 絕對合規"], ans: 1, feedback: "正確。它保護雙方免受重大不可控破壞的影響。" },
+                            { q: "除了成本之外，現今評估供應商的另一個關鍵構面是什麼？", opts: ["企業總部規模", "交貨準時性與靈活性", "執行長的年齡", "社群媒體粉絲數"], ans: 1, feedback: "正確。營運的可靠性與靈活性是基礎韌性的關鍵。" },
                             { q: "合約中的 SLA 代表什麼？", opts: ["供應物流協議", "服務水準協議", "策略槓桿資產", "標準法律行動"], ans: 1, feedback: "正確。它嚴格定義了預期的績效與服務指標。" },
-                            { q: "為什麼企業會在合約中使用原物料價格指數化？", opts: ["為了防止極端的價格波動", "為了合法延遲出貨", "為了縮減勞動力", "為了規避關稅"], ans: 0, feedback: "正確。它將合約價格與市場商品價格掛鉤，公平分攤風險。" }
+                            { q: "為什麼企業會在合約中使用原物料價格指數化？", opts: ["防止極端的價格波動", "合法延遲出貨", "縮減勞動力", "規避關稅"], ans: 0, feedback: "正確。它將合約價格與總體市場價格掛鉤，公平分攤風險。" }
                         ]
                     },
                     {
                         title: "精實生產與供應鏈整合",
                         kicker: "4. OPERATIONAL EXCELLENCE",
-                        overview: "透過 TPS、JIT 與 ERP 系統優化營運效率。",
+                        overview: "透過 TPS、JIT 與 ERP 系統優化基礎營運效率。",
                         highlights: ["JIT 與 TPS", "WIP 控制", "交易成本", "ERP 整合"],
-                        desc: "現代生產管理的根源，從福特 (Ford) 的大規模流水線，一路演進至豐田生產系統 (TPS) 的精煉優雅。福特革命性地創造了規模經濟，而 TPS 則引入了「精實生產」(Lean Production)，強調消除浪費 (Muda) 與實施「即時生產」(Just-In-Time, JIT)。透過嚴格控制「在製品」(WIP) 庫存，企業能大幅降低持有成本，並暴露出隱藏的生產瓶頸。\n\n然而，在波動的地緣政治環境中實施極端的 JIT 是有高風險的。這正是交易成本經濟學 (TCE) 與企業資源規劃 (ERP) 系統發揮關鍵作用之處。TCE 強調企業必須在搜尋、談判與監督成本，以及外包效益之間取得平衡。為管理這些複雜度，ERP 與管理資訊系統 (MIS) 成為了供應鏈的中樞神經系統。\n\nERP 整合提供了橫跨採購、庫存管理與銷售的「即時可視性」。它自動化訂單處理、動態追蹤庫存變動，並使生產排程與實際市場需求保持一致，確保「精實」的策略在面臨供應衝擊時不會變得「脆弱」。",
-                        wrapUp: "精實生產能將效率最大化，但必須搭配強大的 ERP 數據可視性，以維持供應鏈的韌性。",
+                        desc: "現代生產管理的根源，演進至豐田生產系統 (TPS) 的精煉優雅。TPS 引入了「精實生產」，強調消除浪費與實施「即時生產」(JIT)。透過嚴格控制「在製品」(WIP) 庫存，企業能大幅降低持有成本，並暴露出隱藏的生產瓶頸。\n\n然而，在波動的總體環境中實施極端的 JIT 是有高風險的。這正是交易成本經濟學 (TCE) 與企業資源規劃 (ERP) 系統發揮策略作用之處。TCE 強調企業必須在搜尋、談判與監督成本之間取得平衡。為管理這些複雜度，ERP 成為了供應鏈的基礎中樞神經系統。\n\nERP 整合提供了橫跨採購、庫存管理與銷售的即時可視性。它自動化訂單處理、動態追蹤庫存變動，並使生產排程與實際市場需求保持一致，確保「精實」的架構在面臨供應衝擊時不會變得脆弱。",
+                        wrapUp: "精實生產能將效率最大化，但必須搭配強大的 ERP 數據可視性，以維持策略韌性。",
                         cards: [
-                            { term: "JIT (即時生產)", def: "僅在生產流程確切需要時才接收物料，將庫存降至最低。" },
-                            { term: "WIP (在製品)", def: "正在處理中尚未完成的產品；是衡量浪費與流程效率的關鍵指標。" },
-                            { term: "ERP 系統", def: "企業資源規劃：深度整合企業核心業務流程（如進銷存）的資訊軟體。" },
-                            { term: "交易成本 (TCE)", def: "企業在市場交易中產生的額外摩擦成本：搜尋、談判與監督成本。" }
+                            { term: "JIT (即時生產)", def: "僅在生產流程確切需要時才接收物料，將基礎庫存降至最低。" },
+                            { term: "WIP (在製品)", def: "處理中尚未完成的產品；是衡量浪費與流程效率的關鍵構面。" },
+                            { term: "ERP 系統", def: "深度整合企業核心業務與基礎流程的資訊架構軟體。" },
+                            { term: "交易成本 (TCE)", def: "企業在市場交易中產生的額外摩擦：包含搜尋、談判與監督成本。" }
                         ],
                         quiz: [
-                            { q: "即時生產 (JIT) 的主要營運目標是什麼？", opts: ["擴大倉儲空間需求", "減少庫存並消除生產浪費", "刻意延長前置時間", "無限制擴張勞動力"], ans: 1, feedback: "正確。JIT 透過準時送達物料來將庫存持有成本降至最低。" },
-                            { q: "哪個系統可作為跨部門庫存與銷售資料的中央資訊樞紐？", opts: ["TPS", "JIT", "ERP", "TCE"], ans: 2, feedback: "正確。ERP 能即時整合所有跨部門的營運數據與排程。" },
-                            { q: "在交易成本經濟學 (TCE) 中，以下何者是關鍵成本因素？", opts: ["搜尋與談判成本", "廠房電費", "行銷預算", "研發資本支出"], ans: 0, feedback: "正確。TCE 專注於在市場上進行交易與合作的摩擦成本。" },
-                            { q: "嚴格控制 WIP 的主要目的是什麼？", opts: ["增加儲存空間", "暴露生產瓶頸並減少浪費", "創造庫存剩餘", "降低員工的工作速度"], ans: 1, feedback: "正確。控制在製品數量是精實製造維持連續流的核心。" }
+                            { q: "即時生產 (JIT) 的主要策略目標是什麼？", opts: ["擴大倉儲空間需求", "減少庫存並消除生產浪費", "刻意延長前置時間", "無限制擴張勞動力"], ans: 1, feedback: "正確。JIT 透過準時送達物料來將持有成本降至最低。" },
+                            { q: "哪個架構可作為跨部門庫存與銷售資料的中央資訊樞紐？", opts: ["TPS", "JIT", "ERP", "TCE"], ans: 2, feedback: "正確。ERP 能即時整合所有跨部門的基礎營運數據。" },
+                            { q: "在交易成本經濟學中，以下何者是關鍵成本因素？", opts: ["搜尋與談判成本", "廠房電費", "行行銷預算", "研發資本支出"], ans: 0, feedback: "正確。TCE 專注於在市場上進行交易的摩擦成本。" },
+                            { q: "嚴格控制 WIP 的主要目的是什麼？", opts: ["增加儲存空間", "暴露生產瓶頸並減少浪費", "創造庫存剩餘", "降低員工的工作速度"], ans: 1, feedback: "正確。控制在製品數量是精實製造維持連續流的基礎。" }
                         ]
                     },
                     {
-                        title: "AI 於需求預測與物流優化",
+                        title: "AI 需求預測與物流優化",
                         kicker: "5. DIGITAL TRANSFORMATION",
-                        overview: "利用人工智慧預測市場需求並優化供應鏈路徑。",
+                        overview: "利用人工智慧分析總體數據以預測需求並優化路徑。",
                         highlights: ["AI 預測模型", "動態 EOQ", "路徑最佳化", "風險評分"],
-                        desc: "人工智慧 (AI) 的導入正在徹底改變中小企業管理供應鏈的方式。傳統的需求預測高度依賴靜態的歷史平均值，這在市場發生劇烈干擾時往往完全失效。如今，AI 模型——從機器學習演算法到 ChatGPT 與 Google Sheets AI 等工具——能夠分析龐大的數據集，包含季節性、市場趨勢甚至地緣政治新聞，提供高度準確的預測性分析。\n\n其中一個最直接的應用是動態計算「經濟訂購量」(EOQ)。傳統的 EOQ 公式旨在找出使庫存持有成本與訂購成本總和最小化的訂購量；而 AI 能夠根據即時的供應商報價與倉儲容量，持續動態調整這些變數。此外，AI 正在深刻改造物流優化領域。\n\n透過演算法解決旅行推銷員問題 (TSP) 或車輛路線問題 (VRP)，並結合 Google Maps API，中小企業能大幅降低運輸成本與碳足跡。最後，AI 在供應商管理中也能發揮作用，透過匯總各種數據建立動態的「供應商風險評分」，讓採購團隊能採取預防性而非被動的行動。",
-                        wrapUp: "AI 不會取代人類的商業判斷；它是高階主管的決策擴增器，將數據轉化為戰略情資。",
+                        desc: "人工智慧 (AI) 的導入正在徹底改變企業管理供應鏈的方式。傳統的需求預測高度依賴靜態的歷史平均值，這在總體市場發生劇烈干擾時往往完全失效。如今，AI 模型能夠分析龐大的數據集，包含季節性與地緣政治新聞，提供高度準確的預測性情資。\n\n其中一個最直接的策略應用是動態計算「經濟訂購量」(EOQ)。傳統的 EOQ 公式旨在找出使庫存持有與訂購成本最小化的數量；而 AI 能夠根據即時的供應商報價與倉儲容量，持續動態調整這些基礎變數。此外，AI 正在深刻改造物流優化領域。\n\n透過演算法解決車輛路線問題 (VRP)，企業能大幅降低運輸成本。最後，AI 透過匯總多構面數據建立動態的「供應商風險評分」，讓採購團隊能採取預防性行動。",
+                        wrapUp: "AI 不會取代人類的判斷；它是高階主管的策略擴增器，將數據轉化為決策情資。",
                         cards: [
-                            { term: "動態 EOQ", def: "經濟訂購量：AI 根據即時變數（報價、倉儲）持續調整的最佳訂購數量。" },
-                            { term: "TSP / VRP", def: "物流優化模型：尋找最短或最佳配送路線的組合優化演算法。" },
-                            { term: "AI 需求預測", def: "利用歷史大數據與機器學習模型來預測未來的市場需求與波動趨勢。" },
-                            { term: "供應商風險評分", def: "AI 自動生成的動態指標，用於量化評估供應商的穩定性與潛在斷鏈風險。" }
+                            { term: "動態 EOQ", def: "由 AI 根據即時總體變數持續運算調整的最佳經濟訂購數量。" },
+                            { term: "VRP 演算法", def: "車輛路線問題：尋找最短或最佳配送路徑的組合優化模型。" },
+                            { term: "AI 需求預測", def: "利用歷史大數據與機器學習來預測未來的市場波動與構面趨勢。" },
+                            { term: "供應商風險評分", def: "AI 自動生成的動態指標，用於量化評估供應鏈的潛在斷鏈風險。" }
                         ],
                         quiz: [
                             { q: "經濟訂購量 (EOQ) 的財務目的是什麼？", opts: ["將庫存總量最大化", "使總持有成本與訂購成本最小化", "尋找單價最便宜的供應商", "計算送貨的交通路線"], ans: 1, feedback: "正確。EOQ 在數學上尋找訂購數量的完美成本平衡點。" },
-                            { q: "哪種 AI 演算法應用常被用來優化物流貨車的配送路線？", opts: ["NLP (自然語言處理)", "VRP (車輛路線問題)", "動態 EOQ", "PESTEL"], ans: 1, feedback: "正確。VRP 演算法可最小化車隊的行駛時間與油耗。" },
-                            { q: "AI 模型如何從根本上改善需求預測？", opts: ["透過隨機生成猜測", "透過分析龐大且複雜的歷史與即時數據集", "透過發送顧客問卷", "透過暫停生產線運作"], ans: 1, feedback: "正確。AI 擅長在海量且非線性的數據中找出隱藏的模式。" },
-                            { q: "是非題：導入 AI 於供應鏈後，高階主管的經驗判斷已完全過時且不再需要。", opts: ["對 (True)", "錯 (False)"], ans: 1, feedback: "正確。AI 是強大的診斷工具，但策略性決策仍極度依賴人類專業判斷。" }
+                            { q: "哪種 AI 演算法架構常被用來優化物流貨車的配送路線？", opts: ["NLP (自然語言處理)", "VRP (車輛路線問題)", "動態 EOQ", "PESTEL"], ans: 1, feedback: "正確。VRP 演算法可最小化車隊的行駛時間與油耗。" },
+                            { q: "AI 模型如何從根本上改善需求預測？", opts: ["透過隨機生成猜測", "透過分析龐大且複雜的數據集", "透過發送顧客問卷", "透過暫停生產線運作"], ans: 1, feedback: "正確。AI 擅長在海量數據中找出隱藏的策略模式。" },
+                            { q: "是非題：導入 AI 於供應鏈後，高階主管的經驗判斷已完全過時。", opts: ["對 (True)", "錯 (False)"], ans: 1, feedback: "正確。AI 是強大的診斷工具，但策略性決策仍極度依賴人類判斷。" }
                         ]
                     },
                     {
-                        title: "零售通路策略與 O2O 整合",
+                        title: "零售通路與 O2O 整合策略",
                         kicker: "6. OMNI-CHANNEL INTEGRATION",
-                        overview: "設計全通路銷售策略並無縫整合實體與數位零售。",
+                        overview: "設計全通路架構並無縫整合實體與數位零售構面。",
                         highlights: ["全通路策略", "O2O 整合", "BOPIS 模式", "智慧促銷"],
-                        desc: "零售產業的版圖已從孤立的銷售管道，不可逆轉地轉向整合的「全通路」(Omni-channel) 生態系。對中小企業而言，決定採用直營 (D2C)、經銷商或批發模式，高度取決於產品屬性、目標客群與成本限制。然而，現今真正的競爭優勢在於 O2O（線上線下整合）。\n\nO2O 最典型的範例是 BOPIS 模式（線上下單，線下取貨）。此策略不僅滿足了消費者對即時獲得產品的渴望並省下運費，更能將關鍵的客流量引導至實體店面，創造追加銷售 (Up-selling) 的機會。AI 在此扮演核心角色，透過分析 Google Analytics 與顧客購買歷史，在取貨過程中提供個人化的商品推薦。\n\n此外，AI 能透過智慧促銷策略優化庫存週轉率。與其單純依賴會破壞毛利的降價打折，AI 能建議最佳的「聯合促銷」(Bundling) 或目標贈品策略，在不貶低品牌價值的情況下清除滯銷庫存。掌握這些全通路策略，能確保為顧客提供無縫且順暢的消費旅程。",
-                        wrapUp: "成功的零售管理能將數位便利性與實體體驗無縫融合，並由資料驅動的個人化行銷作為後盾。",
+                        desc: "零售產業的版圖已從孤立的銷售管道，不可逆轉地轉向整合的「全通路」(Omni-channel) 生態系。對企業而言，決定採用直營、經銷商或批發模式，高度取決於產品屬性與基礎成本限制。然而，現今真正的策略優勢在於 O2O（線上線下整合）。\n\nO2O 最典型的架構是 BOPIS 模式（線上下單，線下取貨）。此策略不僅滿足了消費者對即時獲得產品的渴望並省下運費，更能將關鍵的客流量引導至實體店面，創造追加銷售的機會。AI 在此扮演核心角色，透過分析顧客歷史，在取貨過程中提供個人化的商品推薦。\n\n此外，AI 能透過智慧促銷策略優化庫存週轉率。與其單純依賴會破壞毛利的降價打折，AI 能建議最佳的「聯合促銷」(Bundling) 策略，在不貶低品牌價值的情況下清除滯銷庫存。",
+                        wrapUp: "成功的零售管理能將數位便利性與實體體驗無縫融合，並由資料驅動的策略作為後盾。",
                         cards: [
-                            { term: "O2O 模式", def: "線上線下整合：將數位電商通路與實體店面體驗緊密結合的營運模式。" },
-                            { term: "BOPIS", def: "線上下單，線下取貨：帶動實體店面人流的核心 O2O 策略。" },
-                            { term: "全通路 (Omni)", def: "跨越所有線上線下銷售平台，提供顧客一致、無斷點且無縫的消費體驗。" },
+                            { term: "O2O 模式", def: "線上線下整合：將數位電商通路與實體店面體驗緊密結合的營運架構。" },
+                            { term: "BOPIS", def: "線上下單，線下取貨：帶動實體店面基礎人流的核心 O2O 策略。" },
+                            { term: "全通路 (Omni)", def: "跨越多個銷售構面與平台，提供顧客一致、無斷點的消費體驗。" },
                             { term: "聯合促銷 (Bundling)", def: "將產品策略性綁定銷售，以在不砍殺毛利的情況下加速庫存週轉。" }
                         ],
                         quiz: [
-                            { q: "在現代零售中，BOPIS 代表什麼意思？", opts: ["Buy One, Pay In Store", "Buy Online, Pick Up In Store (線上下單線下取貨)", "Best Online Price In Store", "Bring Own Product In Store"], ans: 1, feedback: "正確。這是帶動實體店面流量與提升體驗的關鍵 O2O 策略。" },
-                            { q: "對零售商而言，BOPIS 模式的主要戰略好處之一是什麼？", opts: ["大幅增加物流運輸成本", "強迫顧客拉長等待時間", "引導實體客流量並創造追加銷售 (Up-selling) 的機會", "減少品牌網站的整體流量"], ans: 2, feedback: "正確。進入實體店的顧客極可能會受吸引而購買額外的商品。" },
-                            { q: "為了保護品牌價值，除了單純打折降價，另一種清除庫存的較佳方法是？", opts: ["將商品下架隱藏", "聯合促銷 / 組合包裝 (Bundling)", "反向提高產品售價", "停止所有的行銷廣告"], ans: 1, feedback: "正確。組合促銷能在不直接砍價的情況下，增加顧客的價值感知。" },
-                            { q: "何謂真正的「全通路」(Omni-channel) 策略？", opts: ["企業僅專注於數位線上的銷售", "提供各通路獨立且互不相通的顧客體驗", "跨越所有接觸點，提供統一、一致且無縫的品牌體驗", "全面淘汰實體店面以降低成本"], ans: 2, feedback: "正確。核心目標是讓顧客的消費旅程沒有任何摩擦與斷點。" }
+                            { q: "在現代零售中，BOPIS 架構代表什麼意思？", opts: ["Buy One, Pay In Store", "Buy Online, Pick Up In Store", "Best Online Price In Store", "Bring Own Product In Store"], ans: 1, feedback: "正確。這是帶動實體店面流量與提升體驗的關鍵策略。" },
+                            { q: "對零售商而言，BOPIS 模式的主要策略好處之一是什麼？", opts: ["大幅增加物流運輸成本", "強迫顧客拉長等待時間", "引導實體客流量並創造追加銷售的機會", "減少品牌網站的整體流量"], ans: 2, feedback: "正確。進入實體店的顧客極可能會受吸引而購買額外的商品。" },
+                            { q: "為了保護品牌價值，除了單純打折降價，另一種清除庫存的較佳策略是？", opts: ["將商品下架隱藏", "聯合促銷 (Bundling)", "反向提高產品售價", "停止所有的行銷廣告"], ans: 1, feedback: "正確。組合促銷能在不直接砍價的情況下，增加顧客的價值感知。" },
+                            { q: "何謂真正的「全通路」(Omni-channel) 策略？", opts: ["僅專注於數位線上的銷售", "提供各通路獨立且互不相通的顧客體驗", "跨越所有接觸點，提供統一、一致且無縫的品牌體驗", "全面淘汰實體基礎店面"], ans: 2, feedback: "正確。核心目標是讓顧客的消費旅程沒有任何摩擦與斷點。" }
                         ]
                     }
                 ],
-                lab: { title: "策略實驗室", kicker: "7. INTERACTIVE MODULES", items: ["Kraljic 策略分類器", "動態 EOQ 計算器", "PESTEL 風險矩陣", "供應鏈韌性評分卡"] },
-                resources: { title: "洞察與資源", kicker: "8. EXTERNAL LITERATURE", items: ["Financial Times: Ukraine crisis energy impact", "Reuters: China-ASEAN trade dynamics", "Bloomberg: Supply Chain Resilience Reports", "Focus Taiwan: Tariff impacts on SMEs"] },
-                analytics: { title: "數據儀表板", kicker: "9. PERFORMANCE METRICS", group: "參與組別", studentId: "學號 / 識別碼", name: "姓名", export: "匯出分析報告 (CSV)", interactions: "互動次數", time: "系統停留 (秒)", clear: "匯出後清除本地數據" },
-                footer: { top: "回到頂部", architect: "Architect: Prof. Shihmin Lo", copy: "2025 SCM Global Strategy. 版權所有" },
-                btn: { next: "進入下一個模組", retry: "重新測試", prevPage: "返回上一節", nextPage: "前往下一節", check: "知識驗證" }
+                lab: { title: "策略實驗室", kicker: "7. INTERACTIVE MODULES", desc: "將策略架構應用於真實世界的營運情境中進行互動演練。" },
+                resources: { title: "外部學習資源", kicker: "8. LITERATURE & INSIGHTS", items: ["Financial Times: 總體地緣政治對能源的衝擊", "Reuters: 東協策略性貿易構面", "Bloomberg: 供應鏈基礎韌性報告", "Focus Taiwan: 關稅架構對中小企業的影響"] },
+                analytics: { title: "學習歷程分析", kicker: "9. PERFORMANCE METRICS", group: "所屬組別", studentId: "學號 (ID)", name: "真實姓名", export: "匯出歷程紀錄 (CSV)", interactions: "互動點擊次數", time: "系統停留時間 (秒)", clear: "匯出後清除本地紀錄", cards: "學習卡翻閱率", quiz: "測驗答對率" },
+                footer: { top: "回到頂部", architect: "Architect: Prof. Shihmin Lo", copy: "2026 Global SCM Strategy. 版權所有." },
+                btn: { next: "前往下一單元", retry: "重新測試", prevPage: "返回上一單元", check: "模組知識檢定", read: "已讀", answered: "已答", nextCards: "下一組卡片", nextQuiz: "下一組題目", flashcards: "翻轉學習卡" }
             }
         };
 
         // ==========================================
-        // 3. MAIN REACT APP COMPONENT
+        // 2. SVG COMPONENTS (Customized for each Module)
+        // ==========================================
+        const SvgOverview = ({ lang }) => (
+            <svg viewBox="0 0 800 400" className="w-full h-auto max-h-[350px] object-contain drop-shadow-lg">
+                <rect width="100%" height="100%" fill="var(--bcg-primary)" rx="8" />
+                
+                {/* Lines connecting nodes */}
+                <line x1="400" y1="200" x2="400" y2="60" stroke="var(--bcg-accent)" strokeWidth="3" />
+                <line x1="400" y1="200" x2="530" y2="125" stroke="var(--bcg-accent)" strokeWidth="3" />
+                <line x1="400" y1="200" x2="530" y2="275" stroke="var(--bcg-accent)" strokeWidth="3" />
+                <line x1="400" y1="200" x2="400" y2="340" stroke="var(--bcg-accent)" strokeWidth="3" />
+                <line x1="400" y1="200" x2="270" y2="275" stroke="var(--bcg-accent)" strokeWidth="3" />
+                <line x1="400" y1="200" x2="270" y2="125" stroke="var(--bcg-accent)" strokeWidth="3" />
+
+                {/* Orbiting track */}
+                <circle cx="400" cy="200" r="140" fill="none" stroke="var(--bcg-gold)" strokeWidth="1" strokeDasharray="5 5" opacity="0.4"/>
+
+                {/* Central Hub */}
+                <circle cx="400" cy="200" r="60" fill="var(--bcg-gold)" />
+                <text x="400" y="195" fill="var(--bcg-primary)" fontSize="18" fontWeight="bold" textAnchor="middle">Global</text>
+                <text x="400" y="215" fill="var(--bcg-primary)" fontSize="18" fontWeight="bold" textAnchor="middle">SCM</text>
+                
+                {/* Nodes and Labels - explicitly positioned outside to prevent overlap */}
+                <circle cx="400" cy="60" r="20" fill="var(--bcg-accent)" stroke="var(--bcg-gold)" strokeWidth="2" />
+                <text x="400" y="30" fill="white" fontSize="14" fontWeight="bold" textAnchor="middle">{lang==='EN'?'M1 Geopolitics':'M1 地緣政治'}</text>
+
+                <circle cx="530" cy="125" r="20" fill="var(--bcg-accent)" stroke="var(--bcg-gold)" strokeWidth="2" />
+                <text x="560" y="130" fill="white" fontSize="14" fontWeight="bold" textAnchor="start">{lang==='EN'?'M2 Sourcing':'M2 採購策略'}</text>
+
+                <circle cx="530" cy="275" r="20" fill="var(--bcg-accent)" stroke="var(--bcg-gold)" strokeWidth="2" />
+                <text x="560" y="280" fill="white" fontSize="14" fontWeight="bold" textAnchor="start">{lang==='EN'?'M3 Contract':'M3 合約防護'}</text>
+
+                <circle cx="400" cy="340" r="20" fill="var(--bcg-accent)" stroke="var(--bcg-gold)" strokeWidth="2" />
+                <text x="400" y="375" fill="white" fontSize="14" fontWeight="bold" textAnchor="middle">{lang==='EN'?'M4 Lean ERP':'M4 精實生產'}</text>
+
+                <circle cx="270" cy="275" r="20" fill="var(--bcg-accent)" stroke="var(--bcg-gold)" strokeWidth="2" />
+                <text x="240" y="280" fill="white" fontSize="14" fontWeight="bold" textAnchor="end">{lang==='EN'?'M5 AI Demand':'M5 AI 預測'}</text>
+
+                <circle cx="270" cy="125" r="20" fill="var(--bcg-accent)" stroke="var(--bcg-gold)" strokeWidth="2" />
+                <text x="240" y="130" fill="white" fontSize="14" fontWeight="bold" textAnchor="end">{lang==='EN'?'M6 O2O Retail':'M6 零售全通路'}</text>
+            </svg>
+        );
+
+        const SvgPestelHex = ({ lang }) => (
+            <svg viewBox="0 0 800 300" className="w-full h-auto max-h-[250px] object-contain drop-shadow-lg">
+                <rect width="100%" height="100%" fill="var(--bcg-primary)" rx="8" />
+                {/* Hexagon Points: Center (400,150) R=100. */}
+                <polygon points="400,50 486.6,100 486.6,200 400,250 313.4,200 313.4,100" fill="none" stroke="var(--bcg-border)" strokeWidth="2" />
+                
+                {/* Political Slice (Geopolitics Highlighted) */}
+                <polygon points="400,150 400,50 486.6,100" fill="var(--bcg-gold)" opacity="0.9"/>
+                <line x1="443" y1="75" x2="520" y2="50" stroke="var(--bcg-gold)" strokeWidth="2" />
+                <text x="530" y="55" fill="var(--bcg-gold)" fontSize="16" fontWeight="bold" textAnchor="start">{lang==='EN'?'Political (Geopolitics)':'政治 (地緣衝擊)'}</text>
+                
+                {/* Economic */}
+                <polygon points="400,150 486.6,100 486.6,200" fill="var(--bcg-accent)" opacity="0.6" stroke="var(--bcg-primary)"/>
+                <text x="510" y="155" fill="white" fontSize="14" textAnchor="start">{lang==='EN'?'Economic':'經濟'}</text>
+                
+                {/* Social */}
+                <polygon points="400,150 486.6,200 400,250" fill="var(--bcg-accent)" opacity="0.4" stroke="var(--bcg-primary)"/>
+                <text x="510" y="240" fill="white" fontSize="14" textAnchor="start">{lang==='EN'?'Social':'社會'}</text>
+
+                {/* Tech */}
+                <polygon points="400,150 400,250 313.4,200" fill="var(--bcg-accent)" opacity="0.6" stroke="var(--bcg-primary)"/>
+                <text x="290" y="240" fill="white" fontSize="14" textAnchor="end">{lang==='EN'?'Tech':'科技'}</text>
+
+                {/* Environment */}
+                <polygon points="400,150 313.4,200 313.4,100" fill="var(--bcg-accent)" opacity="0.4" stroke="var(--bcg-primary)"/>
+                <text x="290" y="155" fill="white" fontSize="14" textAnchor="end">{lang==='EN'?'Environment':'環境'}</text>
+
+                {/* Legal */}
+                <polygon points="400,150 313.4,100 400,50" fill="var(--bcg-accent)" opacity="0.6" stroke="var(--bcg-primary)"/>
+                <text x="290" y="70" fill="white" fontSize="14" textAnchor="end">{lang==='EN'?'Legal':'法律'}</text>
+
+                <circle cx="400" cy="150" r="15" fill="var(--bcg-primary)" />
+            </svg>
+        );
+
+        const SvgKraljic = ({ lang }) => (
+            <svg viewBox="0 0 800 300" className="w-full h-auto max-h-[250px] object-contain drop-shadow-lg">
+                <rect width="100%" height="100%" fill="var(--bcg-primary)" rx="8" />
+                <line x1="400" y1="40" x2="400" y2="260" stroke="var(--bcg-gold)" strokeWidth="4" />
+                <line x1="200" y1="150" x2="600" y2="150" stroke="var(--bcg-gold)" strokeWidth="4" />
+                <text x="400" y="25" fill="var(--bcg-gold)" fontSize="14" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Profit Impact':'利潤影響 (高)'}</text>
+                <text x="610" y="155" fill="var(--bcg-gold)" fontSize="14" fontWeight="bold" textAnchor="start">{lang==='EN'?'Supply Risk':'供應風險 (高)'}</text>
+                
+                <rect x="220" y="60" width="160" height="70" fill="var(--bcg-accent)" rx="4"/>
+                <text x="300" y="100" fill="white" fontSize="16" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Leverage':'槓桿'}</text>
+                
+                <rect x="420" y="60" width="160" height="70" fill="#248232" rx="4"/>
+                <text x="500" y="100" fill="white" fontSize="16" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Strategic':'策略性'}</text>
+                
+                <rect x="220" y="170" width="160" height="70" fill="#121815" rx="4"/>
+                <text x="300" y="210" fill="white" fontSize="16" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Non-Critical':'非關鍵'}</text>
+                
+                <rect x="420" y="170" width="160" height="70" fill="#8B1E19" rx="4"/>
+                <text x="500" y="210" fill="white" fontSize="16" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Bottleneck':'瓶頸'}</text>
+            </svg>
+        );
+
+        const SvgContract = ({ lang }) => (
+            <svg viewBox="0 0 800 300" className="w-full h-auto max-h-[250px] object-contain drop-shadow-lg">
+                <rect width="100%" height="100%" fill="var(--bcg-primary)" rx="8" />
+                <circle cx="250" cy="150" r="80" fill="var(--bcg-accent)" opacity="0.8" />
+                <text x="250" y="155" fill="white" fontSize="18" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Buyer':'企業 (買方)'}</text>
+                
+                <circle cx="550" cy="150" r="80" fill="var(--bcg-accent)" opacity="0.8" />
+                <text x="550" y="155" fill="white" fontSize="18" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Supplier':'供應商'}</text>
+
+                <rect x="330" y="110" width="140" height="80" fill="var(--bcg-gold)" rx="10" />
+                <text x="400" y="145" fill="var(--bcg-primary)" fontSize="16" fontWeight="bold" textAnchor="middle">{lang==='EN'?'SLA & Contract':'SLA 與合約'}</text>
+                <text x="400" y="165" fill="var(--bcg-primary)" fontSize="12" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Force Majeure':'不可抗力防護'}</text>
+
+                <path d="M 280 120 Q 400 60 520 120" fill="none" stroke="white" strokeWidth="2" strokeDasharray="5 5" />
+                <path d="M 520 180 Q 400 240 280 180" fill="none" stroke="white" strokeWidth="2" strokeDasharray="5 5" />
+            </svg>
+        );
+
+        const SvgLean = ({ lang }) => (
+            <svg viewBox="0 0 800 300" className="w-full h-auto max-h-[250px] object-contain drop-shadow-lg">
+                <rect width="100%" height="100%" fill="var(--bcg-primary)" rx="8" />
+                <polygon points="100,50 200,50 250,120 150,120" fill="var(--bcg-gray-dark)" stroke="var(--bcg-gold)" strokeWidth="2"/>
+                <text x="175" y="90" fill="white" fontSize="14" textAnchor="middle">{lang==='EN'?'Raw Materials':'原物料'}</text>
+
+                <path d="M 260 85 L 340 85 L 340 95 L 260 95 Z" fill="var(--bcg-gold)" />
+
+                <polygon points="350,70 500,70 470,230 380,230" fill="var(--bcg-accent)" stroke="white" strokeWidth="2"/>
+                <text x="425" y="140" fill="white" fontSize="18" fontWeight="bold" textAnchor="middle">TPS / JIT</text>
+                <text x="425" y="165" fill="var(--bcg-gold)" fontSize="14" fontWeight="bold" textAnchor="middle">{lang==='EN'?'WIP Control':'極低在製品'}</text>
+
+                <path d="M 510 150 L 590 150 L 590 160 L 510 160 Z" fill="var(--bcg-gold)" />
+
+                <rect x="600" y="110" width="120" height="80" fill="var(--bcg-red)" rx="8"/>
+                <text x="660" y="155" fill="white" fontSize="18" fontWeight="bold" textAnchor="middle">{lang==='EN'?'ERP Hub':'ERP 樞紐'}</text>
+            </svg>
+        );
+
+        const SvgAI = ({ lang }) => (
+            <svg viewBox="0 0 800 300" className="w-full h-auto max-h-[250px] object-contain drop-shadow-lg">
+                <rect width="100%" height="100%" fill="var(--bcg-primary)" rx="8" />
+                <line x1="100" y1="250" x2="700" y2="250" stroke="white" strokeWidth="2" />
+                <line x1="100" y1="250" x2="100" y2="50" stroke="white" strokeWidth="2" />
+                
+                <path d="M 100 180 Q 250 170 400 175 T 700 170" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="3" />
+                <text x="680" y="160" fill="rgba(255,255,255,0.5)" fontSize="12" textAnchor="end">{lang==='EN'?'Static Average':'傳統靜態均值'}</text>
+
+                <path d="M 100 220 Q 250 100 400 200 T 700 80" fill="none" stroke="var(--bcg-gold)" strokeWidth="4" />
+                <text x="680" y="65" fill="var(--bcg-gold)" fontSize="14" fontWeight="bold" textAnchor="end">{lang==='EN'?'AI Predictive Demand':'AI 預測需求曲線'}</text>
+
+                <circle cx="250" cy="148" r="6" fill="var(--bcg-accent)" stroke="var(--bcg-gold)" strokeWidth="2"/>
+                <text x="250" y="130" fill="white" fontSize="10" textAnchor="middle">VRP / EOQ</text>
+
+                <circle cx="550" cy="145" r="6" fill="var(--bcg-accent)" stroke="var(--bcg-gold)" strokeWidth="2"/>
+                <text x="550" y="125" fill="white" fontSize="10" textAnchor="middle">{lang==='EN'?'Risk Scoring':'風險評分'}</text>
+            </svg>
+        );
+
+        const SvgO2O = ({ lang }) => (
+            <svg viewBox="0 0 800 300" className="w-full h-auto max-h-[250px] object-contain drop-shadow-lg">
+                <rect width="100%" height="100%" fill="var(--bcg-primary)" rx="8" />
+                <rect x="200" y="100" width="120" height="100" fill="var(--bcg-accent)" rx="12" stroke="var(--bcg-gold)" strokeWidth="2"/>
+                <text x="260" y="145" fill="white" fontSize="16" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Digital/Online':'數位電商'}</text>
+                <text x="260" y="165" fill="var(--bcg-gold)" fontSize="12" textAnchor="middle">{lang==='EN'?'Order':'線上下單'}</text>
+
+                <rect x="480" y="100" width="120" height="100" fill="var(--bcg-gray-dark)" rx="12" stroke="white" strokeWidth="2"/>
+                <text x="540" y="145" fill="white" fontSize="16" fontWeight="bold" textAnchor="middle">{lang==='EN'?'Physical/Store':'實體門市'}</text>
+                <text x="540" y="165" fill="var(--bcg-gold)" fontSize="12" textAnchor="middle">{lang==='EN'?'BOPIS/Upsell':'取貨與追加'}</text>
+
+                <path d="M 320 120 Q 400 80 480 120" fill="none" stroke="var(--bcg-gold)" strokeWidth="3" />
+                <path d="M 480 180 Q 400 220 320 180" fill="none" stroke="var(--bcg-gold)" strokeWidth="3" />
+                
+                <text x="400" y="155" fill="white" fontSize="18" fontWeight="bold" textAnchor="middle">Omni-channel</text>
+            </svg>
+        );
+
+
+        // ==========================================
+        // INTERACTIVE LAB COMPONENTS (M7)
+        // ==========================================
+        const LabKraljic = ({ lang }) => {
+            const items = [
+                { id: 1, name: lang==='EN'?'Standard Screws':'標準螺絲', q: 'Non-Critical' },
+                { id: 2, name: lang==='EN'?'Custom Microchip':'客製微晶片', q: 'Strategic' },
+                { id: 3, name: lang==='EN'?'Office Paper':'辦公影印紙', q: 'Leverage' }, 
+                { id: 4, name: lang==='EN'?'Rare Earth Metals':'稀土金屬', q: 'Bottleneck' }
+            ];
+            const quadrants = ['Leverage', 'Strategic', 'Non-Critical', 'Bottleneck'];
+            const [placed, setPlaced] = useState({});
+            const [selectedId, setSelectedId] = useState(null);
+
+            const handlePlace = (q) => {
+                if (selectedId === null) return;
+                setPlaced(prev => ({ ...prev, [selectedId]: q }));
+                setSelectedId(null);
+            };
+
+            const isCorrect = Object.keys(placed).length === items.length && items.every(i => placed[i.id] === i.q);
+
+            return (
+                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md">
+                    <h3 className="text-2xl font-serif-title font-bold mb-6">{lang==='EN'?'1. Kraljic Strategy Classifier':'1. Kraljic 策略分類器'}</h3>
+                    <div className="mb-6">
+                        <p className="text-sm opacity-80 mb-4">{lang==='EN'?'Select an item, then click a quadrant to assign it.':'點擊選擇採購項目，再點擊矩陣象限進行分配。'}</p>
+                        <div className="flex flex-wrap gap-2">
+                            {items.map(i => (
+                                <button key={i.id} onClick={() => setSelectedId(i.id)} 
+                                    className={`px-4 py-2 text-sm border transition ${placed[i.id] ? 'opacity-30 border-gray-600' : selectedId === i.id ? 'border-[var(--bcg-gold)] bg-[var(--bcg-gold)]/20' : 'border-[var(--bcg-border)] hover:border-white'}`}>
+                                    {i.name} {placed[i.id] && `(${placed[i.id]})`}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 aspect-video max-w-2xl">
+                        {quadrants.map(q => (
+                            <button key={q} onClick={() => handlePlace(q)} 
+                                className="flex flex-col items-center justify-center border border-[var(--bcg-border)] bg-black/40 hover:bg-[var(--bcg-accent)] transition relative">
+                                <span className="font-bold text-lg opacity-50 absolute top-4">{q}</span>
+                                <div className="mt-6 flex flex-wrap gap-2 justify-center">
+                                    {items.filter(i => placed[i.id] === q).map(i => (
+                                        <span key={i.id} className={`px-2 py-1 text-xs font-bold ${placed[i.id] === i.q ? 'bg-[var(--bcg-green)] text-white' : 'bg-[var(--bcg-red)] text-white'}`}>
+                                            {i.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                    {Object.keys(placed).length === items.length && (
+                        <div className={`mt-6 p-4 font-bold text-center border max-w-2xl ${isCorrect ? 'border-[var(--bcg-green)] text-[var(--bcg-green)]' : 'border-[var(--bcg-red)] text-[var(--bcg-red)]'}`}>
+                            {isCorrect ? (lang==='EN'?'Excellent! All items correctly classified.':'完美！所有項目皆分類正確。') : (lang==='EN'?'Review Required. Check the red items.':'需重新審視，請檢查紅色標示的錯誤項目。')}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const LabEOQ = ({ lang }) => {
+            const [D, setD] = useState(5000);
+            const [S, setS] = useState(100);
+            const [H, setH] = useState(10);
+            const eoq = Math.round(Math.sqrt((2 * D * S) / H));
+
+            return (
+                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md">
+                    <h3 className="text-2xl font-serif-title font-bold mb-6">{lang==='EN'?'2. Dynamic EOQ Simulator':'2. 動態 EOQ 模擬器'}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div className="space-y-6">
+                            <div>
+                                <label className="flex justify-between text-sm font-bold mb-2">
+                                    <span>{lang==='EN'?'Annual Demand (D)':'年度總需求量 (D)'}</span> <span>{D}</span>
+                                </label>
+                                <input type="range" min="1000" max="20000" step="500" value={D} onChange={e=>setD(e.target.value)} className="w-full" />
+                            </div>
+                            <div>
+                                <label className="flex justify-between text-sm font-bold mb-2">
+                                    <span>{lang==='EN'?'Order Cost (S)':'單次訂購成本 (S)'}</span> <span>${S}</span>
+                                </label>
+                                <input type="range" min="10" max="500" step="10" value={S} onChange={e=>setS(e.target.value)} className="w-full" />
+                            </div>
+                            <div>
+                                <label className="flex justify-between text-sm font-bold mb-2">
+                                    <span>{lang==='EN'?'Holding Cost/Unit (H)':'單位持有成本 (H)'}</span> <span>${H}</span>
+                                </label>
+                                <input type="range" min="1" max="50" step="1" value={H} onChange={e=>setH(e.target.value)} className="w-full" />
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center justify-center bg-[var(--bcg-primary)] border border-[var(--bcg-gold)] p-8">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--bcg-gold)] mb-2">Optimal Order Quantity</span>
+                            <span className="text-6xl font-serif-title font-bold">{eoq}</span>
+                            <span className="text-sm mt-4 opacity-70">Formula: √(2DS / H)</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const LabRadar = ({ lang }) => {
+            const [scores, setScores] = useState([5,5,5,5,5,5]);
+            const labels = ["Political", "Economic", "Social", "Tech", "Env", "Legal"];
+            const updateScore = (idx, val) => { const n = [...scores]; n[idx] = val; setScores(n); };
+            
+            const cx=150, cy=150, rMax=100;
+            const points = scores.map((s, i) => {
+                const angle = (Math.PI / 3) * i - Math.PI / 2;
+                const r = (s / 10) * rMax;
+                return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+            }).join(' ');
+
+            return (
+                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md">
+                    <h3 className="text-2xl font-serif-title font-bold mb-6">{lang==='EN'?'3. PESTEL Radar Evaluator':'3. PESTEL 雷達評估器'}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            {labels.map((lb, i) => (
+                                <div key={i}>
+                                    <label className="flex justify-between text-xs font-bold mb-1">
+                                        <span>{lb} Risk</span> <span>{scores[i]}/10</span>
+                                    </label>
+                                    <input type="range" min="1" max="10" value={scores[i]} onChange={e=>updateScore(i, e.target.value)} className="w-full" />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex justify-center items-center">
+                            <svg width="300" height="300">
+                                {[0.2, 0.4, 0.6, 0.8, 1].map(scale => (
+                                    <polygon key={scale} points={labels.map((_, i) => `${cx + (rMax*scale)*Math.cos((Math.PI/3)*i - Math.PI/2)},${cy + (rMax*scale)*Math.sin((Math.PI/3)*i - Math.PI/2)}`).join(' ')} fill="none" stroke="rgba(255,255,255,0.1)" />
+                                ))}
+                                <polygon points={points} fill="var(--bcg-gold)" opacity="0.6" stroke="var(--bcg-gold)" strokeWidth="2" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const LabO2O = ({ lang }) => {
+            const [traffic, setTraffic] = useState(1000);
+            const [bopisRate, setBopisRate] = useState(5);
+            const [upsellRate, setUpsellRate] = useState(15);
+            const [aov, setAov] = useState(50);
+            
+            const bopisOrders = Math.floor(traffic * (bopisRate / 100));
+            const baseRev = bopisOrders * aov;
+            const upsellOrders = Math.floor(bopisOrders * (upsellRate / 100));
+            const upsellRev = upsellOrders * aov;
+            const totalRev = baseRev + upsellRev;
+
+            return (
+                <div className="bg-white/5 border border-[var(--bcg-border)] p-6 shadow-md">
+                    <h3 className="text-2xl font-serif-title font-bold mb-6">{lang==='EN'?'4. O2O ROI Calculator':'4. O2O 全通路 ROI 計算機'}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                            <div>
+                                <label className="flex justify-between text-xs font-bold mb-1"><span>{lang==='EN'?'Daily Web Traffic':'每日網站流量'}</span> <span>{traffic}</span></label>
+                                <input type="range" min="100" max="10000" step="100" value={traffic} onChange={e=>setTraffic(e.target.value)} className="w-full" />
+                            </div>
+                            <div>
+                                <label className="flex justify-between text-xs font-bold mb-1"><span>{lang==='EN'?'BOPIS Conversion Rate':'線下取貨轉換率'}</span> <span>{bopisRate}%</span></label>
+                                <input type="range" min="1" max="20" step="1" value={bopisRate} onChange={e=>setBopisRate(e.target.value)} className="w-full" />
+                            </div>
+                            <div>
+                                <label className="flex justify-between text-xs font-bold mb-1"><span>{lang==='EN'?'In-store Upsell Rate':'門市追加購買率'}</span> <span>{upsellRate}%</span></label>
+                                <input type="range" min="1" max="50" step="1" value={upsellRate} onChange={e=>setUpsellRate(e.target.value)} className="w-full" />
+                            </div>
+                            <div>
+                                <label className="flex justify-between text-xs font-bold mb-1"><span>{lang==='EN'?'Average Order Value (AOV)':'平均客單價 (AOV)'}</span> <span>${aov}</span></label>
+                                <input type="range" min="10" max="500" step="10" value={aov} onChange={e=>setAov(e.target.value)} className="w-full" />
+                            </div>
+                        </div>
+                        <div className="flex flex-col justify-center bg-[var(--bcg-primary)] border border-[var(--bcg-gold)] p-8">
+                            <div className="mb-4">
+                                <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{lang==='EN'?'Base Revenue':'基礎營收'}</div>
+                                <div className="text-2xl font-serif-title">${baseRev.toLocaleString()}</div>
+                            </div>
+                            <div className="mb-4">
+                                <div className="text-[10px] font-bold uppercase text-[var(--bcg-gold)] mb-1">{lang==='EN'?'Incremental Upsell Revenue':'追加銷售增額營收'}</div>
+                                <div className="text-2xl font-serif-title text-[var(--bcg-gold)]">+ ${upsellRev.toLocaleString()}</div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-white/20">
+                                <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{lang==='EN'?'Total O2O Revenue':'總計 O2O 營收'}</div>
+                                <div className="text-4xl font-serif-title font-bold">${totalRev.toLocaleString()}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        // ==========================================
+        // 3. MAIN APPLICATION ROUTING
         // ==========================================
         const Icon = ({ name, className }) => {
             const spanRef = useRef(null);
@@ -418,69 +780,61 @@
                     lucide.createIcons({ root: spanRef.current });
                 }
             }, [name, className]);
-            return <span ref={spanRef} className="inline-flex items-center justify-center"></span>;
+            return <span ref={spanRef} className="inline-flex items-center justify-center ui-protect"></span>;
         };
 
         const App = () => {
-            const [lang, setLang] = useState('ZH');
+            const [lang, setLang] = useState('EN');
             const [isDark, setIsDark] = useState(true);
             const [currentPage, setCurrentPage] = useState(0); 
             const [isMenuOpen, setIsMenuOpen] = useState(false);
             
-            // Analytics State
             const [analytics, setAnalytics] = useState({
                 startTime: Date.now(),
                 pageTimes: {},
                 interactions: 0,
-                cardUsage: 0,
-                quizScore: 0,
-                quizTotal: 0
+                cardsSeen: new Set(),
+                quizzesAnswered: new Set(),
+                quizScore: 0
             });
             const [userInfo, setUserInfo] = useState({ group: 'G1', id: '', name: '' });
             const [shouldClearData, setShouldClearData] = useState(false);
 
             const t = CONTENT[lang];
 
-            // Setup Theme
             useEffect(() => {
-                document.body.className = `${isDark ? 'dark' : 'light'} select-none`;
+                document.body.className = isDark ? 'dark' : 'light';
             }, [isDark]);
 
-            // Page Timer
             useEffect(() => {
                 const timer = setInterval(() => {
-                    setAnalytics(prev => ({
-                        ...prev,
-                        pageTimes: { ...prev.pageTimes, [currentPage]: (prev.pageTimes[currentPage] || 0) + 1 }
-                    }));
+                    setAnalytics(prev => ({ ...prev, pageTimes: { ...prev.pageTimes, [currentPage]: (prev.pageTimes[currentPage] || 0) + 1 } }));
                 }, 1000);
                 return () => clearInterval(timer);
             }, [currentPage]);
 
-            // Interaction Handler
             const trackInteraction = () => setAnalytics(prev => ({ ...prev, interactions: prev.interactions + 1 }));
 
-            // TTS Engine (With Browser Safety Checks)
             const [isSpeaking, setIsSpeaking] = useState(false);
             const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
             
             const speak = useCallback((text) => {
-                if (!synth) return;
+                if (!synth || !text) return;
                 synth.cancel();
-                if (!text) return;
-                const msg = new SpeechSynthesisUtterance(text);
-                msg.lang = lang === 'EN' ? 'en-GB' : 'zh-TW';
+                const cleanText = DOMPurify.sanitize(text, { ALLOWED_TAGS: [] }); 
+                const msg = new SpeechSynthesisUtterance(cleanText);
                 
                 const voices = synth.getVoices();
                 if (lang === 'EN') {
-                    msg.voice = voices.find(v => v.name.includes('Google UK English Male')) || voices.find(v => v.lang === 'en-GB') || voices[0];
+                    msg.lang = 'en-GB';
+                    msg.voice = voices.find(v => v.lang === 'en-GB' && v.name.includes('Male')) || voices.find(v => v.lang === 'en-GB') || voices[0];
                 } else {
-                    msg.voice = voices.find(v => v.name.includes('Yating')) || voices.find(v => v.lang === 'zh-TW') || voices[0];
+                    msg.lang = 'zh-TW';
+                    msg.voice = voices.find(v => v.lang === 'zh-TW' && (v.name.includes('Yating') || v.name.includes('Han'))) || voices.find(v => v.lang === 'zh-TW') || voices[0];
                 }
 
                 msg.onend = () => setIsSpeaking(false);
                 msg.onerror = () => setIsSpeaking(false);
-
                 synth.speak(msg);
                 setIsSpeaking(true);
                 trackInteraction();
@@ -496,122 +850,115 @@
                     if (contentDiv) speak(contentDiv.innerText);
                 }
             };
-            
-            const stopVoice = () => { 
-                if (synth) { 
-                    synth.cancel(); 
-                    setIsSpeaking(false); 
-                } 
-            };
-
+            const stopVoice = () => { if (synth) { synth.cancel(); setIsSpeaking(false); } };
             const scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); trackInteraction(); };
+            const navigateTo = (idx) => { stopVoice(); setCurrentPage(idx); setIsMenuOpen(false); scrollToTop(); };
 
-            const navigateTo = (idx) => {
-                stopVoice();
-                setCurrentPage(idx);
-                setIsMenuOpen(false);
-                scrollToTop();
-            };
+            useEffect(() => {
+                const handleContextMenu = (e) => {
+                    const selection = window.getSelection().toString();
+                    if (selection.length > 0) return; 
+                    e.preventDefault();
+                    alert("Intellectual Property of Prof. Shihmin Lo");
+                };
+                const handleKeyDown = (e) => {
+                    if (e.key === 'F12' || (e.ctrlKey && e.key.toLowerCase() === 'u') || (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase()))) {
+                        e.preventDefault();
+                        alert("Intellectual Property of Prof. Shihmin Lo");
+                    }
+                };
+                document.addEventListener('contextmenu', handleContextMenu);
+                document.addEventListener('keydown', handleKeyDown);
+                return () => { document.removeEventListener('contextmenu', handleContextMenu); document.removeEventListener('keydown', handleKeyDown); };
+            }, []);
 
             return (
                 <div className="min-h-screen flex flex-col justify-between">
-                    {/* ===== HEADER (h-16) - Sharp, Minimalist ===== */}
-                    <header className={`fixed top-0 w-full h-16 z-50 flex items-center justify-between px-6 lg:px-12 border-b ${isDark ? 'bg-[var(--bcg-gray-dark)]/95 border-white/10' : 'bg-white/95 border-black/10'} backdrop-blur-md`}>
-                        {/* Left */}
+                    {/* ===== HEADER ===== */}
+                    <header className={`fixed top-0 w-full h-16 z-50 flex items-center justify-between px-6 lg:px-12 border-b ui-protect ${isDark ? 'bg-[var(--bcg-primary)]/95 border-white/10' : 'bg-[#FAFAFA]/95 border-black/10'} backdrop-blur-md`}>
                         <div className="flex items-center space-x-4">
-                            <button onClick={() => { setIsMenuOpen(!isMenuOpen); trackInteraction(); }} className="p-1 hover:opacity-70 transition">
+                            <button onClick={() => { setIsMenuOpen(!isMenuOpen); trackInteraction(); }} className="p-1 hover:text-[var(--bcg-gold)] transition">
                                 <Icon name={isMenuOpen ? "x" : "menu"} className="w-5 h-5" />
                             </button>
+                            
                             <div className="flex items-center cursor-pointer group" onClick={() => scrollToTop()}>
-                                <div className="w-6 h-6 bg-[var(--bcg-accent)] flex items-center justify-center rounded-sm">
-                                    <span className="text-white font-serif-title font-bold text-sm">S</span>
+                                <div className="px-2 h-6 bg-[var(--bcg-gold)] flex items-center justify-center rounded-sm">
+                                    <span className="text-[var(--bcg-primary)] font-serif-title font-bold text-sm tracking-wider">{t.brand}</span>
                                 </div>
-                                <span className="ml-3 font-serif-title font-bold text-sm tracking-widest uppercase hidden sm:block opacity-90">{t.brand}</span>
+                                <span className="ml-3 font-serif-title font-bold text-sm tracking-widest uppercase hidden sm:block opacity-90">{t.brandFull}</span>
                             </div>
+
+                            <button onClick={() => navigateTo(0)} className="ml-2 p-1 hover:text-[var(--bcg-gold)] transition hidden sm:block" title="Home">
+                                <Icon name="home" className="w-5 h-5" />
+                            </button>
                         </div>
 
-                        {/* Right */}
                         <div className="flex items-center space-x-4 lg:space-x-6 text-sm">
-                            {/* Voice Controls */}
                             <div className="flex items-center space-x-3 border-r border-[var(--bcg-border)] pr-4 lg:pr-6">
-                                <button onClick={togglePlayPause} className={`transition flex items-center gap-1.5 uppercase text-[10px] font-bold tracking-widest ${isSpeaking ? 'text-[var(--bcg-accent)]' : 'hover:opacity-70'}`}>
+                                <button onClick={togglePlayPause} className={`transition flex items-center gap-1.5 uppercase text-[10px] font-bold tracking-widest ${isSpeaking ? 'text-[var(--bcg-gold)]' : 'hover:opacity-70'}`}>
                                     <Icon name={isSpeaking && (!synth || !synth.paused) ? "pause" : "play"} className="w-4 h-4" />
-                                    <span className="hidden md:block">Audio</span>
+                                    <span className="hidden md:block">Voice</span>
                                 </button>
                                 <button onClick={stopVoice} className="hover:text-[var(--bcg-red)] transition">
                                     <Icon name="square" className="w-3.5 h-3.5 fill-current" />
                                 </button>
                             </div>
-
-                            {/* Bilingual Toggle */}
-                            <button 
-                                onClick={() => { setLang(lang === 'EN' ? 'ZH' : 'EN'); trackInteraction(); stopVoice(); }}
-                                className="text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition"
-                            >
+                            <button onClick={() => { setLang(lang === 'EN' ? 'ZH' : 'EN'); trackInteraction(); stopVoice(); }} className="text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
                                 {lang === 'EN' ? '繁中' : 'EN'}
                             </button>
-
-                            {/* Theme Toggle */}
-                            <button onClick={() => { setIsDark(!isDark); trackInteraction(); }} className="hover:opacity-70 transition">
+                            <button onClick={() => { setIsDark(!isDark); trackInteraction(); }} className="hover:text-[var(--bcg-gold)] transition">
                                 <Icon name={isDark ? "sun" : "moon"} className="w-4 h-4" />
                             </button>
                         </div>
                     </header>
 
-                    {/* ===== SIDEBAR MENU - Corporate Slide-out ===== */}
+                    {/* ===== SIDEBAR ===== */}
                     {isMenuOpen && (
-                        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)}>
-                            <div className={`fixed top-0 left-0 h-full w-80 shadow-2xl overflow-y-auto transform transition-transform ${isDark ? 'bg-[#15191C] border-r border-white/5' : 'bg-[#FAFAFA] border-r border-black/5'}`} onClick={e => e.stopPropagation()}>
+                        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm ui-protect" onClick={() => setIsMenuOpen(false)}>
+                            <div className={`fixed top-0 left-0 h-full w-80 shadow-2xl overflow-y-auto transform transition-transform ${isDark ? 'bg-[var(--bcg-primary)] border-r border-white/5' : 'bg-white border-r border-black/5'}`} onClick={e => e.stopPropagation()}>
                                 <div className="p-8 border-b border-[var(--bcg-border)]">
-                                    <h2 className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2">Navigation</h2>
-                                    <div className="font-serif-title font-bold text-xl">{t.brand}</div>
+                                    <h2 className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-2">Navigation</h2>
+                                    <div className="font-serif-title font-bold text-xl">{t.brandFull}</div>
                                 </div>
                                 <nav className="p-4 space-y-1">
-                                    {t.nav.map((item, idx) => (
-                                        <button 
-                                            key={idx} onClick={() => navigateTo(idx)}
-                                            className={`w-full flex items-center px-4 py-3 text-left text-sm transition-all rounded-sm
-                                                ${currentPage === idx ? 'bg-[var(--bcg-primary)] text-white font-bold' : 'hover:bg-black/5 dark:hover:bg-white/5 font-medium'}
-                                            `}
-                                        >
-                                            <span className={`w-6 text-xs font-bold ${currentPage === idx ? 'text-[var(--bcg-gold)]' : 'opacity-40'}`}>
-                                                {idx < 10 ? `0${idx}` : idx}
-                                            </span>
+                                    {t.nav.map((item, idx) => {
+                                        let iconName = "file-text";
+                                        if(idx===0) iconName="layout-dashboard";
+                                        if(idx===7) iconName="flask-conical";
+                                        if(idx===8) iconName="library";
+                                        if(idx===9) iconName="bar-chart-2";
+
+                                        return (
+                                        <button key={idx} onClick={() => navigateTo(idx)} className={`w-full flex items-center px-4 py-3 text-left text-sm transition-all rounded-sm ${currentPage === idx ? 'bg-[var(--bcg-accent)] text-white font-bold' : 'hover:bg-black/5 dark:hover:bg-white/5 font-medium'}`}>
+                                            <Icon name={iconName} className={`w-4 h-4 mr-3 ${currentPage === idx ? 'text-[var(--bcg-gold)]' : 'opacity-40'}`} />
+                                            <span className={`w-6 text-xs font-bold opacity-40`}>{idx < 10 ? `0${idx}` : idx}</span>
                                             {item.split('. ')[1] || item}
                                         </button>
-                                    ))}
+                                    )})}
                                 </nav>
                             </div>
                         </div>
                     )}
 
                     {/* ===== MAIN CONTENT ===== */}
-                    <main id="readable-content" className="pt-32 pb-24 px-6 lg:px-12 max-w-4xl mx-auto w-full flex-grow">
-                        {currentPage === 0 && <PageSummary t={t} navigateTo={navigateTo} />}
-                        
-                        {/* Theme rendering is now completely safe from ReferenceErrors and guarantees state reset via Key injection */}
+                    <main id="readable-content" className="pt-28 pb-20 px-6 lg:px-12 max-w-4xl mx-auto w-full flex-grow">
+                        {currentPage === 0 && <PageSummary t={t} lang={lang} navigateTo={navigateTo} />}
                         {currentPage >= 1 && currentPage <= 6 && (
                             <PageTheme 
-                                key={`theme-${currentPage}`} 
-                                theme={t.themes[currentPage - 1]} 
-                                t={t} 
-                                lang={lang} 
-                                setAnalytics={setAnalytics} 
-                                onPrev={() => navigateTo(currentPage - 1)} 
-                                onNext={() => navigateTo(currentPage + 1)} 
+                                key={`theme-${currentPage}`} themeIdx={currentPage} theme={t.themes[currentPage - 1]} t={t} lang={lang} 
+                                analytics={analytics} setAnalytics={setAnalytics} onPrev={() => navigateTo(currentPage - 1)} onNext={() => navigateTo(currentPage + 1)} 
                             />
                         )}
-                        
-                        {currentPage === 7 && <PageLab t={t} />}
-                        {currentPage === 8 && <PageResources t={t} />}
-                        {currentPage === 9 && <PageAnalytics t={t} lang={lang} analytics={analytics} userInfo={userInfo} setUserInfo={setUserInfo} brand={t.brand} shouldClearData={shouldClearData} setShouldClearData={setShouldClearData} setAnalyticsState={setAnalytics} />}
+                        {currentPage === 7 && <PageLab t={t} lang={lang} onPrev={() => navigateTo(6)} onNext={() => navigateTo(8)} />}
+                        {currentPage === 8 && <PageResources t={t} track={trackInteraction} onPrev={() => navigateTo(7)} onNext={() => navigateTo(9)} />}
+                        {currentPage === 9 && <PageAnalytics t={t} lang={lang} analytics={analytics} userInfo={userInfo} setUserInfo={setUserInfo} brand={t.brandFull} shouldClearData={shouldClearData} setShouldClearData={setShouldClearData} setAnalyticsState={setAnalytics} themes={t.themes} onPrev={() => navigateTo(8)} />}
                     </main>
 
-                    {/* ===== FOOTER (h-8 = 1/2 of h-16) - Strictly 32px ===== */}
-                    <footer className={`fixed bottom-0 w-full h-8 z-40 flex items-center justify-between px-6 lg:px-12 text-[10px] font-bold tracking-widest uppercase border-t ${isDark ? 'bg-[var(--bcg-gray-dark)] border-white/10 text-white/50' : 'bg-white border-black/10 text-black/50'}`}>
+                    {/* ===== FOOTER ===== */}
+                    <footer className={`fixed bottom-0 w-full h-8 z-40 flex items-center justify-between px-6 lg:px-12 text-[10px] font-bold tracking-widest uppercase border-t ui-protect ${isDark ? 'bg-[var(--bcg-primary)] border-white/10 text-white/50' : 'bg-[#FAFAFA] border-black/10 text-black/50'}`}>
                         <div>{t.footer.copy}</div>
                         <div className="flex items-center space-x-8">
-                            <a href="https://www.ibs.ncnu.edu.tw/index.php/faculty/tenured-professor/299-smlo" target="_blank" className="hover:text-[var(--bcg-accent)] transition-colors">
+                            <a href="https://www.ibs.ncnu.edu.tw/index.php/faculty/tenured-professor/299-smlo" target="_blank" className="hover:text-[var(--bcg-gold)] transition-colors">
                                 {t.footer.architect}
                             </a>
                             <button onClick={scrollToTop} className="flex items-center space-x-1.5 hover:text-[var(--bcg-gold)] transition-colors">
@@ -626,37 +973,37 @@
 
         // --- SUB-COMPONENTS ---
 
-        const PageSummary = ({ t, navigateTo }) => (
+        const PageSummary = ({ t, lang, navigateTo }) => (
             <div className="animate-fade">
                 <div className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-4">{t.summary.kicker}</div>
                 <h1 className="text-4xl md:text-5xl font-serif-title font-bold mb-10 leading-tight">{t.summary.title}</h1>
-                
-                {/* Editorial Drop-cap / Border style */}
-                <div className="pl-6 border-l-2 border-[var(--bcg-accent)] mb-16">
+                <div className="pl-6 border-l-2 border-[var(--bcg-gold)] mb-12">
                     <p className="text-base md:text-lg leading-relaxed whitespace-pre-line opacity-90 font-light">{t.summary.desc}</p>
                 </div>
+
+                <div className="mb-16 ui-protect"><SvgOverview lang={lang} /></div>
                 
-                {/* Structured Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[var(--bcg-border)] border border-[var(--bcg-border)]">
-                    {t.nav.slice(1).map((item, idx) => (
-                        <button key={idx} onClick={() => navigateTo(idx + 1)} className="group p-8 bg-[var(--bcg-gray-dark)] hover:bg-[var(--bcg-primary)] text-left transition-colors relative overflow-hidden h-full flex flex-col justify-between">
-                            <div className="absolute top-0 right-0 p-4 text-4xl font-serif-title font-bold opacity-10 group-hover:opacity-20 transition-opacity">
-                                0{idx + 1}
-                            </div>
-                            <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-3 block">Module 0{idx + 1}</span>
-                            <h3 className="font-serif-title font-bold text-lg md:text-xl text-white relative z-10">{item.split('. ')[1] || item}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-[var(--bcg-border)] border border-[var(--bcg-border)] ui-protect">
+                    {t.nav.slice(1, 10).map((item, idx) => (
+                        <button key={idx} onClick={() => navigateTo(idx + 1)} className="group p-8 bg-[var(--bcg-gray-dark)] dark:bg-[var(--bcg-primary)] hover:bg-[var(--bcg-accent)] text-left transition-colors relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                            <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-3 block">Theme 0{idx + 1}</span>
+                            <h3 className="font-serif-title font-bold text-lg text-white">{item.split('. ')[1] || item}</h3>
                         </button>
                     ))}
+                </div>
+                <div className="flex justify-end pt-8 ui-protect">
+                    <button onClick={() => navigateTo(1)} className="px-6 py-3 bg-[var(--bcg-gold)] text-black text-xs font-bold tracking-widest uppercase hover:bg-opacity-90 transition">{t.btn.next}</button>
                 </div>
             </div>
         );
 
-        const PageTheme = ({ theme, t, lang, setAnalytics, onPrev, onNext }) => {
+        const PageTheme = ({ themeIdx, theme, t, lang, analytics, setAnalytics, onPrev, onNext }) => {
+            if (!theme) return null;
+
             const [cardPage, setCardPage] = useState(0);
             const [flippedCards, setFlippedCards] = useState({});
             const [quizPage, setQuizPage] = useState(0);
-            const [quizAnswers, setQuizAnswers] = useState({});
-            const [quizFeedback, setQuizFeedback] = useState({});
+            const [localQuizState, setLocalQuizState] = useState({});
 
             const safeCards = theme.cards || [];
             const visibleCards = safeCards.slice(cardPage * 2, cardPage * 2 + 2);
@@ -666,77 +1013,98 @@
 
             const handleFlip = (globalIndex) => {
                 setFlippedCards(prev => ({ ...prev, [globalIndex]: !prev[globalIndex] }));
-                setAnalytics(prev => ({ ...prev, interactions: prev.interactions + 1, cardUsage: prev.cardUsage + 1 }));
+                setAnalytics(prev => {
+                    const newSeen = new Set(prev.cardsSeen).add(`${themeIdx}-${globalIndex}`);
+                    return { ...prev, interactions: prev.interactions + 1, cardsSeen: newSeen };
+                });
             };
 
             const handleQuizAnswer = (qIndex, oIndex) => {
                 const globalIndex = quizPage * 2 + qIndex;
-                if (quizAnswers[globalIndex] !== undefined) return; 
+                const uniqueQId = `${themeIdx}-${globalIndex}`;
+                if (localQuizState[globalIndex] !== undefined) return; 
+                
                 const isCorrect = safeQuizzes[globalIndex].ans === oIndex;
-                setQuizAnswers(prev => ({ ...prev, [globalIndex]: oIndex }));
-                setQuizFeedback(prev => ({ ...prev, [globalIndex]: { correct: isCorrect, msg: safeQuizzes[globalIndex].feedback } }));
-                setAnalytics(prev => ({
-                    ...prev, interactions: prev.interactions + 1, quizTotal: prev.quizTotal + 1, quizScore: prev.quizScore + (isCorrect ? 1 : 0)
-                }));
+                setLocalQuizState(prev => ({ ...prev, [globalIndex]: oIndex }));
+                
+                setAnalytics(prev => {
+                    const newAns = new Set(prev.quizzesAnswered).add(uniqueQId);
+                    const scoreInc = (!prev.quizzesAnswered.has(uniqueQId) && isCorrect) ? 1 : 0;
+                    return { ...prev, interactions: prev.interactions + 1, quizzesAnswered: newAns, quizScore: prev.quizScore + scoreInc };
+                });
             };
 
             const resetQuiz = () => {
-                setQuizAnswers({}); setQuizFeedback({}); setQuizPage(0);
+                setLocalQuizState({});
+                setQuizPage(0);
                 setAnalytics(prev => ({ ...prev, interactions: prev.interactions + 1 }));
             };
 
+            const renderSvg = () => {
+                switch(themeIdx) {
+                    case 1: return <SvgPestelHex lang={lang} />;
+                    case 2: return <SvgKraljic lang={lang} />;
+                    case 3: return <SvgContract lang={lang} />;
+                    case 4: return <SvgLean lang={lang} />;
+                    case 5: return <SvgAI lang={lang} />;
+                    case 6: return <SvgO2O lang={lang} />;
+                    default: return null;
+                }
+            };
+
+            const totalCardsInTheme = safeCards.length;
+            const seenCardsInTheme = safeCards.filter((_, i) => analytics.cardsSeen.has(`${themeIdx}-${i}`)).length;
+            
+            const totalQuizInTheme = safeQuizzes.length;
+            const answeredQuizInTheme = safeQuizzes.filter((_, i) => analytics.quizzesAnswered.has(`${themeIdx}-${i}`)).length;
+
             return (
-                <div className="animate-fade pb-12">
-                    {/* Header */}
-                    <header className="mb-12 border-b border-[var(--bcg-border)] pb-8">
+                <div className="animate-fade pb-8">
+                    <header className="mb-10 border-b border-[var(--bcg-border)] pb-6 ui-protect">
                         <div className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-4">{theme.kicker}</div>
-                        <h1 className="text-3xl md:text-4xl font-serif-title font-bold mb-6 leading-tight">{theme.title}</h1>
+                        <h1 className="text-3xl md:text-4xl font-serif-title font-bold mb-4 leading-tight">{theme.title}</h1>
                         <p className="text-lg font-serif-title italic opacity-80">{theme.overview}</p>
                     </header>
 
-                    {/* Highlights Tags - Flat, Sharp */}
-                    <div className="flex flex-wrap gap-2 mb-10">
+                    <div className="flex flex-wrap gap-2 mb-10 ui-protect">
                         {(theme.highlights || []).map((h, i) => (
                             <span key={i} className="px-3 py-1 bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase rounded-sm">{h}</span>
                         ))}
                     </div>
 
-                    {/* Detailed Description & Image Placeholder */}
-                    <section className="mb-16">
-                        <div className="text-base leading-relaxed opacity-90 whitespace-pre-line font-light mb-8">
+                    {/* Core Text Content */}
+                    <section className="mb-12">
+                        <div className="text-base leading-relaxed opacity-90 whitespace-pre-line font-light select-text">
                             {theme.desc}
-                        </div>
-                        <div className="border border-[var(--bcg-border)] bg-black/5 dark:bg-white/5 p-8 flex flex-col items-center justify-center text-center min-h-[200px]">
-                            <Icon name="image" className="w-8 h-8 opacity-20 mb-3" />
-                            <span className="text-[10px] font-bold tracking-widest uppercase opacity-50 mb-1">
-                                [ {lang === 'EN' ? 'Exhibit' : '圖表'} / {theme.kicker ? theme.kicker.split('.')[0] : ''} ]
-                            </span>
-                            <span className="text-sm font-serif-title italic opacity-70">
-                                [ {lang === 'EN' ? 'Image of' : '圖片預留：'} {theme.title} ]
-                            </span>
                         </div>
                     </section>
 
-                    {/* Flip Cards (Show 2) - Sharp Editorial Style */}
-                    <section className="mb-16">
-                        <div className="flex items-center justify-between mb-6 border-b-2 border-black dark:border-white pb-2">
-                            <h3 className="text-sm font-bold tracking-widest uppercase">Key Concepts</h3>
-                            <span className="text-[10px] font-bold tracking-widest opacity-50">{cardPage * 2 + 1}-{Math.min((cardPage + 1) * 2, safeCards.length)} / {safeCards.length}</span>
+                    <div className="mb-16 ui-protect">
+                        {renderSvg()}
+                    </div>
+
+                    {/* Flashcards */}
+                    <section className="mb-16 ui-protect">
+                        <div className="flex items-center justify-between mb-4 border-b-2 border-[var(--bcg-primary)] dark:border-white pb-2">
+                            <h3 className="text-sm font-bold tracking-widest uppercase">{t.btn.flashcards}</h3>
+                            <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest opacity-60">
+                                <span>{t.btn.read}: {seenCardsInTheme}/{totalCardsInTheme}</span>
+                                <span>|</span>
+                                <span>View: {cardPage * 2 + 1}-{Math.min((cardPage + 1) * 2, totalCardsInTheme)} / {totalCardsInTheme}</span>
+                            </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 select-text">
                             {visibleCards.map((card, idx) => {
                                 const globalIndex = cardPage * 2 + idx;
                                 const flipped = !!flippedCards[globalIndex];
                                 return (
                                     <div key={globalIndex} className="perspective-1000 h-64 cursor-pointer group" onClick={() => handleFlip(globalIndex)}>
                                         <div className={`relative w-full h-full transform-style-3d flip-transition ${flipped ? 'rotate-y-180' : ''}`}>
-                                            {/* Front - Deep Navy */}
                                             <div className="absolute inset-0 backface-hidden bg-[var(--bcg-primary)] text-white p-8 flex flex-col justify-between border-t-4 border-[var(--bcg-gold)]">
                                                 <span className="text-[10px] font-bold tracking-widest uppercase opacity-50">Concept {globalIndex + 1}</span>
                                                 <h4 className="text-2xl font-serif-title font-bold text-center group-hover:scale-105 transition-transform">{card.term}</h4>
                                                 <div className="flex justify-center opacity-50"><Icon name="repeat" className="w-4 h-4" /></div>
                                             </div>
-                                            {/* Back - Light/White */}
                                             <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white text-black p-8 flex flex-col items-center justify-center text-center border border-[var(--bcg-border)] border-t-4 border-[var(--bcg-accent)]">
                                                 <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-accent)] mb-4">{card.term}</span>
                                                 <p className="text-sm leading-relaxed font-medium">{card.def}</p>
@@ -747,30 +1115,34 @@
                             })}
                         </div>
                         <div className="flex justify-end mt-6 space-x-3">
-                            <button onClick={() => { setFlippedCards({}); setCardPage(0); }} className="px-5 py-2 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 dark:hover:bg-white/5 transition">{t.btn.retry}</button>
-                            <button onClick={() => { setFlippedCards({}); setCardPage((cardPage + 1) % Math.ceil(safeCards.length / 2)); }} className="px-5 py-2 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-opacity-90 transition">{t.btn.next}</button>
+                            <button onClick={() => { setCardPage((cardPage + 1) % Math.ceil(totalCardsInTheme / 2)); }} className="px-5 py-2 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[var(--bcg-accent)] transition border border-[var(--bcg-gold)]">
+                                {t.btn.nextCards}
+                            </button>
                         </div>
                     </section>
 
-                    {/* Wrap-up */}
-                    <section className="mb-16 text-center">
+                    <section className="mb-16 text-center select-text">
                         <div className="w-12 h-px bg-[var(--bcg-gold)] mx-auto mb-6"></div>
                         <p className="text-xl md:text-2xl font-serif-title font-bold leading-relaxed">"{theme.wrapUp}"</p>
                         <div className="w-12 h-px bg-[var(--bcg-gold)] mx-auto mt-6"></div>
                     </section>
 
-                    {/* Quiz (Show 2) - Sharp Block Style */}
-                    <section className="mb-16 border border-[var(--bcg-border)] p-8 md:p-10 bg-black/5 dark:bg-white/5">
+                    {/* Quiz Block */}
+                    <section className="mb-16 border border-[var(--bcg-border)] p-8 bg-black/5 dark:bg-white/5 ui-protect">
                         <div className="flex items-center justify-between mb-8 border-b border-[var(--bcg-border)] pb-4">
-                            <h3 className="text-sm font-bold tracking-widest uppercase">{t.btn.check}</h3>
-                            <span className="text-[10px] font-bold tracking-widest opacity-50">{quizPage * 2 + 1}-{Math.min((quizPage + 1) * 2, safeQuizzes.length)} / {safeQuizzes.length}</span>
+                            <h3 className="text-sm font-bold tracking-widest uppercase text-[var(--bcg-gold)]">{t.btn.check}</h3>
+                            <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest opacity-60">
+                                <span>{t.btn.answered}: {answeredQuizInTheme}/{totalQuizInTheme}</span>
+                                <span>|</span>
+                                <span>View: {quizPage * 2 + 1}-{Math.min((quizPage + 1) * 2, totalQuizInTheme)} / {totalQuizInTheme}</span>
+                            </div>
                         </div>
 
-                        <div className="space-y-12">
+                        <div className="space-y-12 select-text">
                             {visibleQuizzes.map((q, qIndex) => {
                                 const globalIndex = quizPage * 2 + qIndex;
-                                const fb = quizFeedback[globalIndex];
-                                const answeredIdx = quizAnswers[globalIndex];
+                                const answeredIdx = localQuizState[globalIndex];
+                                const isCorrect = answeredIdx !== undefined && answeredIdx === q.ans;
 
                                 return (
                                     <div key={globalIndex}>
@@ -781,13 +1153,12 @@
                                             {q.opts.map((opt, oIndex) => {
                                                 let btnClass = "p-4 text-sm text-left font-medium transition-all border ";
                                                 if (answeredIdx === undefined) {
-                                                    btnClass += "border-[var(--bcg-border)] hover:border-[var(--bcg-primary)] hover:bg-[var(--bcg-primary)] hover:text-white";
+                                                    btnClass += "border-[var(--bcg-border)] hover:border-[var(--bcg-gold)] hover:bg-[var(--bcg-gold)]/10";
                                                 } else {
                                                     if (oIndex === q.ans) btnClass += "border-[var(--bcg-green)] bg-[var(--bcg-green)]/10 text-[var(--bcg-green)]"; 
                                                     else if (oIndex === answeredIdx) btnClass += "border-[var(--bcg-red)] bg-[var(--bcg-red)]/10 text-[var(--bcg-red)]"; 
-                                                    else btnClass += "border-[var(--bcg-border)] opacity-40"; 
+                                                    else btnClass += "border-[var(--bcg-border)] opacity-30"; 
                                                 }
-
                                                 return (
                                                     <button key={oIndex} onClick={() => handleQuizAnswer(qIndex, oIndex)} className={btnClass} disabled={answeredIdx !== undefined}>
                                                         <span className="inline-block w-6 font-bold opacity-50">{String.fromCharCode(65 + oIndex)}.</span> {opt}
@@ -795,31 +1166,31 @@
                                                 );
                                             })}
                                         </div>
-                                        {fb && (
-                                            <div className={`mt-4 pl-4 border-l-2 py-1 text-sm font-medium animate-fade flex items-start gap-3 ${fb.correct ? 'border-[var(--bcg-green)] text-[var(--bcg-green)]' : 'border-[var(--bcg-red)] text-[var(--bcg-red)]'}`}>
-                                                <span>{fb.msg}</span>
+                                        {answeredIdx !== undefined && (
+                                            <div className={`mt-4 pl-4 border-l-4 py-2 text-sm font-medium animate-fade ${isCorrect ? 'border-[var(--bcg-green)] text-[var(--bcg-green)]' : 'border-[var(--bcg-red)] text-[var(--bcg-red)]'}`}>
+                                                <div className="font-bold uppercase text-[10px] tracking-widest mb-1">{isCorrect ? (lang==='EN'?'Excellent':'觀念正確，幹得好') : (lang==='EN'?'Review Required':'需要重新複習')}</div>
+                                                {q.feedback}
                                             </div>
                                         )}
                                     </div>
                                 );
                             })}
                         </div>
-                        <div className="flex justify-end mt-10 space-x-3">
-                            <button onClick={resetQuiz} className="px-5 py-2 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 dark:hover:bg-white/5 transition">{t.btn.retry}</button>
-                            <button onClick={() => setQuizPage((quizPage + 1) % Math.ceil(safeQuizzes.length / 2))} className="px-5 py-2 bg-black dark:bg-white text-white dark:text-black text-[10px] font-bold tracking-widest uppercase hover:opacity-80 transition">{t.btn.next}</button>
+                        <div className="flex justify-end mt-10 space-x-3 ui-protect">
+                            <button onClick={resetQuiz} className="px-5 py-2 border border-[var(--bcg-border)] text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 transition">{t.btn.retry}</button>
+                            <button onClick={() => setQuizPage((quizPage + 1) % Math.ceil(totalQuizInTheme / 2))} className="px-5 py-2 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[var(--bcg-accent)] transition border border-[var(--bcg-gold)]">
+                                {t.btn.nextQuiz}
+                            </button>
                         </div>
                     </section>
 
-                    {/* Pagination */}
-                    <div className="flex items-center justify-between pt-6 border-t border-[var(--bcg-border)]">
-                        {theme.kicker && theme.kicker.startsWith("1.") ? <div></div> : (
-                            <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-accent)] transition">
-                                <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
-                            </button>
-                        )}
-                        {theme.kicker && theme.kicker.startsWith("6.") ? <div></div> : (
-                            <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-accent)] transition">
-                                <span>{t.btn.nextPage}</span><Icon name="arrow-right" className="w-4 h-4" />
+                    <div className="flex items-center justify-between pt-6 border-t border-[var(--bcg-border)] ui-protect">
+                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                            <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
+                        </button>
+                        {themeIdx < 6 && (
+                            <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                                <span>{t.btn.next}</span><Icon name="arrow-right" className="w-4 h-4" />
                             </button>
                         )}
                     </div>
@@ -827,64 +1198,96 @@
             );
         };
 
-        const PageLab = ({ t }) => (
-            <div className="animate-fade">
-                <div className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-4">{t.lab.kicker}</div>
-                <h1 className="text-3xl md:text-4xl font-serif-title font-bold mb-10 leading-tight">{t.lab.title}</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[var(--bcg-border)] border border-[var(--bcg-border)]">
-                    {t.lab.items.map((item, idx) => (
-                        <div key={idx} className="p-10 bg-black/5 dark:bg-white/5 flex flex-col items-center justify-center text-center h-48">
-                            <Icon name="lock" className="w-6 h-6 mb-4 opacity-30" />
-                            <h3 className="text-lg font-serif-title font-bold mb-2">{item}</h3>
-                            <span className="text-[10px] font-bold tracking-widest uppercase opacity-40">Module Locked</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
+        const PageLab = ({ t, lang, onPrev, onNext }) => {
+            return (
+                <div className="animate-fade pb-8 ui-protect">
+                    <header className="mb-10 border-b border-[var(--bcg-border)] pb-6">
+                        <div className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-4">{t.lab.kicker}</div>
+                        <h1 className="text-3xl md:text-4xl font-serif-title font-bold mb-4 leading-tight">{t.lab.title}</h1>
+                        <p className="text-base opacity-80 mb-4">{t.lab.desc}</p>
+                    </header>
 
-        const PageResources = ({ t }) => (
-            <div className="animate-fade">
-                <div className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-4">{t.resources.kicker}</div>
-                <h1 className="text-3xl md:text-4xl font-serif-title font-bold mb-10 leading-tight">{t.resources.title}</h1>
-                <div className="border-t-2 border-black dark:border-white">
+                    <div className="space-y-12">
+                        <LabKraljic lang={lang} />
+                        <LabEOQ lang={lang} />
+                        <LabRadar lang={lang} />
+                        <LabO2O lang={lang} />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-10 border-t border-[var(--bcg-border)] mt-16">
+                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                            <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
+                        </button>
+                        <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                            <span>{t.btn.next}</span><Icon name="arrow-right" className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const PageResources = ({ t, track, onPrev, onNext }) => (
+            <div className="animate-fade pb-8 ui-protect">
+                <header className="mb-10 border-b border-[var(--bcg-border)] pb-6">
+                    <div className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-4">{t.resources.kicker}</div>
+                    <h1 className="text-3xl md:text-4xl font-serif-title font-bold mb-4 leading-tight">{t.resources.title}</h1>
+                </header>
+                
+                <div className="border-t-2 border-[var(--bcg-primary)] dark:border-white mb-16">
                     <ul className="divide-y divide-[var(--bcg-border)]">
                         {t.resources.items.map((item, idx) => (
-                            <li key={idx} className="flex items-center gap-4 py-6 group cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition px-4">
+                            <li key={idx} onClick={track} className="flex items-center gap-4 py-6 group cursor-pointer hover:bg-[var(--bcg-gold)]/10 transition px-4">
                                 <span className="text-[10px] font-bold tracking-widest opacity-30 w-6">0{idx+1}</span>
                                 <span className="font-serif-title font-bold text-lg flex-grow">{item}</span>
-                                <Icon name="arrow-up-right" className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-[var(--bcg-accent)]" />
+                                <Icon name="external-link" className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-[var(--bcg-gold)]" />
                             </li>
                         ))}
                     </ul>
                 </div>
+
+                <div className="flex items-center justify-between pt-6 border-t border-[var(--bcg-border)]">
+                    <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                        <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
+                    </button>
+                    <button onClick={onNext} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                        <span>{t.btn.next}</span><Icon name="arrow-right" className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         );
 
-        const PageAnalytics = ({ t, lang, analytics, userInfo, setUserInfo, brand, shouldClearData, setShouldClearData, setAnalyticsState }) => {
+        const PageAnalytics = ({ t, lang, analytics, userInfo, setUserInfo, brand, shouldClearData, setShouldClearData, setAnalyticsState, themes, onPrev }) => {
+            const totalCardsExpected = themes.reduce((acc, theme) => acc + (theme.cards ? theme.cards.length : 0), 0);
+            const totalQuizExpected = themes.reduce((acc, theme) => acc + (theme.quiz ? theme.quiz.length : 0), 0);
+            
+            const cardRate = totalCardsExpected > 0 ? Math.round((analytics.cardsSeen.size / totalCardsExpected) * 100) : 0;
+            const quizAcc = analytics.quizzesAnswered.size > 0 ? Math.round((analytics.quizScore / analytics.quizzesAnswered.size) * 100) : 0;
+            const sessionTime = Math.floor((Date.now() - analytics.startTime) / 1000);
+
             const exportCSV = () => {
-                if (!userInfo.id || !userInfo.name) {
-                    alert(lang === 'EN' ? "Please fill in Group, ID, and Name." : "請填寫組別、學號與姓名。");
+                if (!userInfo.id || !userInfo.name || !userInfo.group) {
+                    alert(lang === 'EN' ? "Validation Failed: Group, ID, and Name are strictly required." : "資料防護：請務必填寫組別、學號與姓名。");
                     return;
                 }
 
-                const totalTime = Math.floor((Date.now() - analytics.startTime) / 1000);
-                const accRate = analytics.quizTotal > 0 ? ((analytics.quizScore / analytics.quizTotal) * 100).toFixed(1) + '%' : '0%';
+                const cleanGroup = DOMPurify.sanitize(userInfo.group);
+                const cleanId = DOMPurify.sanitize(userInfo.id);
+                const cleanName = DOMPurify.sanitize(userInfo.name);
 
                 const rows = [
                     ["Data Export", new Date().toLocaleString()],
-                    ["Brand", brand],
-                    ["Group", userInfo.group],
-                    ["Student ID", userInfo.id],
-                    ["Name", userInfo.name],
+                    ["Course Architecture", brand],
+                    ["Group", cleanGroup],
+                    ["Student ID", cleanId],
+                    ["Name", cleanName],
                     ["", ""],
-                    ["Metric", "Value"],
+                    ["Macro Metric", "Value"],
                     ["Total Interactions", analytics.interactions],
-                    ["Session Time (sec)", totalTime],
-                    ["Flashcards Flipped", analytics.cardUsage],
-                    ["Quiz Accuracy", `${analytics.quizScore}/${analytics.quizTotal} (${accRate})`],
+                    ["Session Time (sec)", sessionTime],
+                    ["Flashcards Explored", `${analytics.cardsSeen.size} / ${totalCardsExpected}`],
+                    ["Quiz Accuracy", `${analytics.quizScore} / ${analytics.quizzesAnswered.size} (${quizAcc}%)`],
                     ["", ""],
-                    ["Page Module", "Time Spent (sec)"]
+                    ["Strategic Module", "Time Allocated (sec)"]
                 ];
 
                 Object.entries(analytics.pageTimes).forEach(([pid, time]) => {
@@ -896,99 +1299,108 @@
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
                 const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `${brand}_${userInfo.group}_${userInfo.name}_${dateStr}.csv`);
+                
+                link.setAttribute("download", `${brand}_${cleanGroup}_${cleanId}_${cleanName}_${dateStr}.csv`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
 
                 if (shouldClearData) {
-                    setAnalyticsState({ startTime: Date.now(), pageTimes: {}, interactions: 0, cardUsage: 0, quizScore: 0, quizTotal: 0 });
+                    setAnalyticsState({ startTime: Date.now(), pageTimes: {}, interactions: 0, cardsSeen: new Set(), quizzesAnswered: new Set(), quizScore: 0 });
                 }
             };
 
             const groups = ["G1","G2","G3","G4","G5","G6","G7","G8","G9","G10","G11","G12","Others"];
 
             return (
-                <div className="animate-fade">
-                    <div className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-4">{t.analytics.kicker}</div>
-                    <h1 className="text-3xl md:text-4xl font-serif-title font-bold mb-10 leading-tight">{t.analytics.title}</h1>
+                <div className="animate-fade pb-8 ui-protect">
+                    <header className="mb-10 border-b border-[var(--bcg-border)] pb-6">
+                        <div className="text-[10px] font-bold tracking-widest uppercase text-[var(--bcg-gold)] mb-4">{t.analytics.kicker}</div>
+                        <h1 className="text-3xl md:text-4xl font-serif-title font-bold mb-4 leading-tight">{t.analytics.title}</h1>
+                    </header>
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-                        {/* Profile Form */}
-                        <div className="lg:col-span-2 space-y-8">
-                            <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2">User Profile</h3>
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2">{t.analytics.group}</label>
-                                    <select value={userInfo.group} onChange={e => setUserInfo({...userInfo, group: e.target.value})} className="w-full bg-transparent border-b border-[var(--bcg-border)] py-2 outline-none focus:border-[var(--bcg-accent)] transition text-sm font-medium">
-                                        {groups.map(g => <option key={g} value={g} className="text-black">{g}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2">{t.analytics.studentId}</label>
-                                    <input type="text" placeholder="e.g. 113212599" value={userInfo.id} onChange={e => setUserInfo({...userInfo, id: e.target.value})} className="w-full bg-transparent border-b border-[var(--bcg-border)] py-2 outline-none focus:border-[var(--bcg-accent)] transition text-sm font-medium" />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2">{t.analytics.name}</label>
-                                    <input type="text" placeholder="e.g. Shihmin Lo" value={userInfo.name} onChange={e => setUserInfo({...userInfo, name: e.target.value})} className="w-full bg-transparent border-b border-[var(--bcg-border)] py-2 outline-none focus:border-[var(--bcg-accent)] transition text-sm font-medium" />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Metrics Dashboard */}
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-16">
+                        {/* Diagnostics Section (Left Side) */}
                         <div className="lg:col-span-3">
-                            <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-8">Real-time Metrics</h3>
+                            <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-6 text-[var(--bcg-gold)]">Session Diagnostics</h3>
                             <div className="grid grid-cols-2 gap-px bg-[var(--bcg-border)] border border-[var(--bcg-border)] mb-8">
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold text-[var(--bcg-accent)] mb-2">{analytics.interactions}</div>
+                                    <div className="text-4xl font-serif-title font-bold text-[var(--bcg-gold)] mb-2">{analytics.interactions}</div>
                                     <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.interactions}</div>
                                 </div>
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold text-[var(--bcg-gold)] mb-2">{Math.floor((Date.now() - analytics.startTime) / 1000)}s</div>
+                                    <div className="text-4xl font-serif-title font-bold text-[var(--bcg-accent)] mb-2">{sessionTime}s</div>
                                     <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.time}</div>
                                 </div>
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold mb-2">{analytics.quizTotal > 0 ? Math.round((analytics.quizScore/analytics.quizTotal)*100) : 0}%</div>
-                                    <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">Quiz Accuracy</div>
+                                    <div className="text-4xl font-serif-title font-bold mb-2">{quizAcc}%</div>
+                                    <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.quiz}</div>
                                 </div>
                                 <div className="p-6 bg-black/5 dark:bg-white/5">
-                                    <div className="text-4xl font-serif-title font-bold mb-2">{analytics.cardUsage}</div>
-                                    <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">Card Flips</div>
+                                    <div className="text-4xl font-serif-title font-bold mb-2">{analytics.cardsSeen.size} <span className="text-lg opacity-50">/ {totalCardsExpected}</span></div>
+                                    <div className="text-[10px] font-bold tracking-widest uppercase opacity-50">{t.analytics.cards}</div>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                <label className="flex items-center space-x-3 cursor-pointer opacity-70 hover:opacity-100 transition">
-                                    <input type="checkbox" checked={shouldClearData} onChange={e => setShouldClearData(e.target.checked)} className="w-4 h-4 accent-[var(--bcg-primary)] rounded-none" />
-                                    <span className="text-[10px] font-bold tracking-widest uppercase">{t.analytics.clear}</span>
-                                </label>
-                                <button onClick={exportCSV} className="w-full py-4 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-opacity-90 transition flex items-center justify-center gap-2">
-                                    <Icon name="download" className="w-4 h-4" /> {t.analytics.export}
-                                </button>
+                            {/* Module Specific Analytics */}
+                            <div className="bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] p-6">
+                                <h4 className="text-xs font-bold tracking-widest uppercase mb-4 text-[var(--bcg-gold)]">Module Time Allocation (Sec)</h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                    {t.nav.map((name, idx) => (
+                                        <div key={idx} className="bg-white/5 p-3 flex flex-col justify-center items-center border border-[var(--bcg-border)]">
+                                            <span className="text-[10px] font-bold opacity-50 mb-1">M{idx}</span>
+                                            <span className="text-sm font-bold text-[var(--bcg-gold)]">{analytics.pageTimes[idx] || 0}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
+
+                        {/* Export & Profile Section (Right Side) */}
+                        <div className="lg:col-span-2 space-y-6">
+                            <div className="bg-black/5 dark:bg-white/5 border border-[var(--bcg-border)] p-6">
+                                <h3 className="text-sm font-bold tracking-widest uppercase border-b border-[var(--bcg-border)] pb-2 mb-6 text-[var(--bcg-gold)]">Student Profile</h3>
+                                <div className="space-y-6 mb-8">
+                                    <div>
+                                        <label className="block text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2">{t.analytics.group} *</label>
+                                        <select value={userInfo.group} onChange={e => setUserInfo({...userInfo, group: e.target.value})} className="w-full bg-transparent border-b border-[var(--bcg-border)] py-2 outline-none focus:border-[var(--bcg-gold)] transition text-sm font-medium">
+                                            {groups.map(g => <option key={g} value={g} className="text-black dark:text-black">{g}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2">{t.analytics.studentId} *</label>
+                                        <input type="text" maxLength="20" placeholder="e.g. 113212599" value={userInfo.id} onChange={e => setUserInfo({...userInfo, id: e.target.value})} className="w-full bg-transparent border-b border-[var(--bcg-border)] py-2 outline-none focus:border-[var(--bcg-gold)] transition text-sm font-medium" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2">{t.analytics.name} *</label>
+                                        <input type="text" maxLength="50" placeholder="e.g. Shihmin Lo" value={userInfo.name} onChange={e => setUserInfo({...userInfo, name: e.target.value})} className="w-full bg-transparent border-b border-[var(--bcg-border)] py-2 outline-none focus:border-[var(--bcg-gold)] transition text-sm font-medium" />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 pt-4 border-t border-[var(--bcg-border)]">
+                                    <label className="flex items-center space-x-3 cursor-pointer opacity-70 hover:opacity-100 transition">
+                                        <input type="checkbox" checked={shouldClearData} onChange={e => setShouldClearData(e.target.checked)} className="w-4 h-4 accent-[var(--bcg-gold)] rounded-none" />
+                                        <span className="text-[10px] font-bold tracking-widest uppercase">{t.analytics.clear}</span>
+                                    </label>
+                                    <button onClick={exportCSV} className="w-full py-4 bg-[var(--bcg-primary)] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[var(--bcg-accent)] transition border border-[var(--bcg-gold)] flex items-center justify-center gap-2 shadow-lg">
+                                        <Icon name="download" className="w-4 h-4" /> {t.analytics.export}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-6 border-t border-[var(--bcg-border)]">
+                        <button onClick={onPrev} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest uppercase hover:text-[var(--bcg-gold)] transition">
+                            <Icon name="arrow-left" className="w-4 h-4" /><span>{t.btn.prevPage}</span>
+                        </button>
                     </div>
                 </div>
             );
         };
 
-        // Render Application
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-
-        // ==========================================
-        // 4. FRONT-END DEFENSE (Key/Right-Click Blocker)
-        // ==========================================
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || 
-               (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || 
-               (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))) {
-                e.preventDefault();
-            }
-        });
-
     </script>
 </body>
 </html>
