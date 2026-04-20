@@ -1391,15 +1391,22 @@
                     ]);
                 });
 
-                let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + rows.map(e => e.join(",")).join("\n");
-                const encodedUri = encodeURI(csvContent);
+                // 使用 Blob 確保支援萬國碼 (UTF-8) 且加入 BOM 頭以防 Excel 亂碼
+                const csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                
                 const link = document.createElement("a");
                 const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
                 
+                link.setAttribute("href", url);
                 link.setAttribute("download", `${brand}_${cleanGroup}_${cleanId}_${cleanName}_${dateStr}.csv`);
                 document.body.appendChild(link);
                 link.click();
+                
+                // 清除暫存連結
                 document.body.removeChild(link);
+                URL.revokeObjectURL(url);
 
                 if (shouldClearData) {
                     setAnalyticsState({ startTime: Date.now(), pageTimes: {}, interactions: 0, cardsShown: new Set(), cardsFlipped: new Set(), quizAnswers: {} });
