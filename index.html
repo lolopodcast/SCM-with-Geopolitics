@@ -1354,20 +1354,35 @@
                 const cleanId = DOMPurify.sanitize(userInfo.id);
                 const cleanName = DOMPurify.sanitize(userInfo.name);
 
+                // 1. 雙語對應 CSV 標題
+                const hDate = lang === 'EN' ? "Export Date" : "匯出日期";
+                const hCourse = lang === 'EN' ? "Course Architecture" : "課程系統名稱";
+                const hInteractions = lang === 'EN' ? "Total Interactions" : "總互動點擊次數";
+                const hSessionTime = lang === 'EN' ? "Total Session Time (s)" : "總停留時間 (秒)";
+                const hAcc = lang === 'EN' ? "Global Quiz Accuracy (%)" : "總體測驗答對率 (%)";
+                
+                const hMod = lang === 'EN' ? "Module Name" : "模組單元名稱";
+                const hTime = lang === 'EN' ? "Time (s)" : "停留時間 (秒)";
+                const hCardF = lang === 'EN' ? "Cards Flipped" : "已翻閱卡片數";
+                const hCardS = lang === 'EN' ? "Cards Shown" : "已顯示卡片數";
+                const hCardT = lang === 'EN' ? "Cards Total" : "卡片總數";
+                const hQuizC = lang === 'EN' ? "Quiz Correct" : "測驗答對題數";
+                const hQuizA = lang === 'EN' ? "Quiz Answered" : "測驗已答題數";
+                const hQuizT = lang === 'EN' ? "Quiz Total" : "測驗總題數";
+
                 const rows = [
-                    ["Data Export", new Date().toLocaleString()],
-                    ["Course Architecture", brand],
-                    ["Group", cleanGroup],
-                    ["Student ID", cleanId],
-                    ["Name", cleanName],
-                    ["", ""],
-                    ["Macro Metric", "Value"],
-                    ["Total Interactions", analytics.interactions],
-                    ["Session Time (sec)", sessionTime],
-                    ["Flashcards Explored", `${analytics.cardsFlipped.size} / ${totalCardsExpected}`],
-                    ["Quiz Accuracy", `${allCorrectVals} / ${allAnsweredKeys} (${quizAcc}%)`],
-                    ["", ""],
-                    ["Module Breakdown", "Time (s)", "Cards (Flipped/Shown/Total)", "Quiz (Correct/Ans/Total)"]
+                    [hDate, new Date().toLocaleString()],
+                    [hCourse, brand],
+                    [t.analytics.group, cleanGroup],
+                    [t.analytics.studentId, cleanId],
+                    [t.analytics.name, cleanName],
+                    [],
+                    [hInteractions, analytics.interactions > 0 ? analytics.interactions : ""],
+                    [hSessionTime, sessionTime > 0 ? sessionTime : ""],
+                    [hAcc, allAnsweredKeys > 0 ? quizAcc : ""],
+                    [],
+                    // 2. 將複合數據拆分為獨立的純數字欄位，避免 Excel 轉換為日期或文字
+                    [hMod, hTime, hCardF, hCardS, hCardT, hQuizC, hQuizA, hQuizT]
                 ];
 
                 themes.forEach((theme, i) => {
@@ -1383,16 +1398,21 @@
                     const correctQuizzes = moduleQuizAnswers.filter(([_, isC]) => isC).length;
                     const timeSec = analytics.pageTimes[themeIdx] || 0;
 
+                    // 3. 沒有填答的數據即輸出為空白 ("")，不強制寫入 0
                     rows.push([
                         `M${themeIdx}: ${theme.title}`,
-                        timeSec,
-                        `${flippedCards}/${shownCards}/${totalCards}`,
-                        `${correctQuizzes}/${answeredQuizzes}/${totalQuizzes}`
+                        timeSec > 0 ? timeSec : "",
+                        shownCards > 0 ? flippedCards : "",
+                        shownCards > 0 ? shownCards : "",
+                        totalCards,
+                        answeredQuizzes > 0 ? correctQuizzes : "",
+                        answeredQuizzes > 0 ? answeredQuizzes : "",
+                        totalQuizzes
                     ]);
                 });
 
-                // 使用 Blob 確保支援萬國碼 (UTF-8) 且加入 BOM 頭以防 Excel 亂碼
-                const csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
+                // 安全防護：使用雙引號包覆每個儲存格，防止文字內的逗號截斷 CSV，並加上 BOM 頭支援 Excel UTF-8
+                const csvContent = "\uFEFF" + rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 
@@ -1404,7 +1424,6 @@
                 document.body.appendChild(link);
                 link.click();
                 
-                // 清除暫存連結
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
 
@@ -1475,16 +1494,18 @@
                                                 <div className="grid grid-cols-3 gap-4 md:w-2/3 text-center">
                                                     <div>
                                                         <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{t.analytics.modTime}</div>
-                                                        <div className="text-sm font-bold">{timeSec}</div>
+                                                        <div className="text-sm font-bold">{timeSec > 0 ? timeSec : "-"}</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{t.analytics.modCards}</div>
-                                                        <div className="text-sm font-bold">{flippedCards} / {shownCards} / {totalCards}</div>
+                                                        <div className="text-sm font-bold">
+                                                            {shownCards > 0 ? `${flippedCards} / ${shownCards} / ${totalCards}` : "-"}
+                                                        </div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-bold uppercase opacity-50 mb-1">{t.analytics.modQuiz}</div>
                                                         <div className={`text-sm font-bold ${correctQuizzes === totalQuizzes && totalQuizzes > 0 ? 'text-[var(--bcg-green)]' : ''}`}>
-                                                            {correctQuizzes} / {answeredQuizzes} / {totalQuizzes}
+                                                            {answeredQuizzes > 0 ? `${correctQuizzes} / ${answeredQuizzes} / ${totalQuizzes}` : "-"}
                                                         </div>
                                                     </div>
                                                 </div>
